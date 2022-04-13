@@ -1,0 +1,26 @@
+{
+  "name": "pika",
+  "version": "1.0.0",
+  "description": "The pragmatic ID system",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hopinc/pika.git"
+  },
+  "keywords": [
+    "id",
+    "snowflake"
+  ],
+  "author": "Phineas <phin@hop.io> (https://phineas.io)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hopinc/pika/issues"
+  },
+  "homepage": "https://github.com/hopinc/pika#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.23"
+  }
+}
