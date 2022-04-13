@@ -5,7 +5,7 @@ interface SnowflakeGenOpts {
   timestamp?: FromEpoch;
 }
 
-interface DecostructedSnowflake {
+interface DeconstructedSnowflake {
   id: bigint;
   timestamp: bigint;
   nodeId: number;
@@ -55,7 +55,6 @@ export class Snowflake {
    * @param epoch the base epoch to use
    * @param nodeId optionally pass a static node identifier (0-1023)
    */
-
   constructor(epoch: FromEpoch, nodeId?: number | bigint) {
     this.#epoch = this.normalizeEpoch(epoch);
     this.#nodeId = nodeId ? BigInt(nodeId) % 1024n : this.computeNodeId();
@@ -77,7 +76,7 @@ export class Snowflake {
     ).toString();
   }
 
-  public deconstruct(id: string | bigint): DecostructedSnowflake {
+  public deconstruct(id: string | bigint): DeconstructedSnowflake {
     const bigIntId = BigInt(id);
     return {
       id: bigIntId,
@@ -93,7 +92,7 @@ export class Snowflake {
   }
 
   /**
-   * Dervies this machine's node ID from the MAC address of the first
+   * Derives this machine's node ID from the MAC address of the first
    * public network interface it finds
    * @returns The computed node ID (0-1023)
    */

@@ -24,8 +24,8 @@ interface PikaInitializationOptions {
 const VALID_PREFIX = /^[a-z0-9_]+$/i;
 
 export class Pika {
-  #snowflake: Snowflake;
   prefixes: Record<string, PikaPrefixRecord> = {};
+  #snowflake: Snowflake;
   #supressPrefixWarnings = false;
 
   constructor(
