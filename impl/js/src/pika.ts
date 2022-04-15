@@ -1,76 +1,90 @@
-import { Snowflake } from "./snowflake";
+import { error, warn } from "./logger";
+import { FromEpoch, Snowflake } from "./snowflake";
 
-export interface PikaPrefixRecord {
-  prefix: string;
-  description: string;
+export interface PikaPrefixRecord<P extends string> {
+  prefix: Lowercase<P>;
+  description?: string;
   secure?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
-export interface DecodedPika {
+export interface DecodedPika<P extends string> {
   prefix: string;
   tail: string;
   snowflake: bigint;
   nodeId: number;
   seq: number;
   version: 1;
-  prefix_record: PikaPrefixRecord | undefined;
+  prefix_record: PikaPrefixRecord<P> | undefined;
 }
 
 interface PikaInitializationOptions {
+  epoch?: FromEpoch;
   suppressPrefixWarnings?: boolean;
+  disableLowercase?: boolean;
 }
 
 const VALID_PREFIX = /^[a-z0-9_]+$/i;
+const DEFAULT_EPOCH = 1640995200000n; // Jan 1 2022
 
-export class Pika {
-  prefixes: Record<string, PikaPrefixRecord> = {};
+type PrefixInit<V extends string> = Lowercase<V> | PikaPrefixRecord<V>;
+
+export class Pika<
+  V extends string,
+  T extends readonly [PrefixInit<V>, ...PrefixInit<V>[]]
+> {
+  prefixes: Record<string, PikaPrefixRecord<V>> = {};
   #snowflake: Snowflake;
-  #supressPrefixWarnings = false;
+  #suppressPrefixWarnings = false;
 
-  constructor(
-    prefixes: PikaPrefixRecord[] = [],
-    opts: PikaInitializationOptions = {}
+  /**
+   * See
+   * @param prefixes a list of PikaPrefixRecords to initialize pika with
+   * @param opts misc. options to initialize pika with
+   */
+  constructor(prefixes: T, opts: PikaInitializationOptions = {}) {
+    this.#snowflake = new Snowflake(opts.epoch || DEFAULT_EPOCH);
+    this.#suppressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
+
+    this.prefixes = prefixes.reduce(
+      (a, p) =>
+        typeof p === "string" ? { ...a, [p]: { prefix: p } } : { ...a, p },
+      {}
+    );
+  }
+
+  gen(
+    prefix:
+      | Extract<T[number], string>
+      | Extract<Exclude<T[number], string>, PikaPrefixRecord<string>>["prefix"]
   ) {
-    this.#snowflake = new Snowflake(1420070400000);
-    this.#supressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
+    // prefix = prefix.toLowerCase();
 
-    prefixes.forEach((p) => this.register(p));
-  }
-
-  public register(prefixRecord: PikaPrefixRecord) {
-    if (!VALID_PREFIX.test(prefixRecord.prefix)) {
-      console.warn(
-        `[pika] an invalid prefix ${prefixRecord.prefix} was attemped to be registered; prefixes must be alphanumeric (a-z0-9_) and may include underscores; this prefix will be ignored`
-      );
-      return;
-    }
-
-    this.prefixes = { ...this.prefixes, [prefixRecord.prefix]: prefixRecord };
-  }
-
-  public deregister(prefix: string) {
-    delete this.prefixes[prefix];
-  }
-
-  public gen(prefix: string) {
-    if (!VALID_PREFIX.test(prefix))
+    if (!VALID_PREFIX.test(prefix)) {
       throw TypeError(
         `invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`
       );
+    }
 
-    if (!this.prefixes[prefix] && !this.#supressPrefixWarnings)
-      console.warn(
-        `[pika] Unregistered prefix (${prefix}) was used. This can cause unknown behavior - see <> for details.`
+    if (!this.prefixes[prefix] && !this.#suppressPrefixWarnings)
+      warn(
+        `Unregistered prefix (${prefix}) was used. This can cause unknown behavior - see <> for details.`
       );
 
     const snowflake = this.#snowflake.gen();
     return `${prefix.toLowerCase()}_${Buffer.from(snowflake).toString(
-      "base64"
+      "base64url"
     )}`;
   }
 
-  public decode(id: string): DecodedPika {
+  /**
+   *  Gen a Snowflake, if you really need one
+   */
+  public genSnowflake() {
+    return this.#snowflake.gen();
+  }
+
+  public decode(id: V): DecodedPika<V> {
     try {
       const s = id.split("_");
       const tail = s[s.length - 1];
@@ -81,7 +95,7 @@ export class Pika {
         throw Error("attempted to decode invalid pika; tail was corrupt");
 
       const { id: snowflake, ...v } = this.#snowflake.deconstruct(
-        Buffer.from(sf, "base64").toString()
+        Buffer.from(sf, "base64url").toString()
       );
 
       return {
@@ -93,7 +107,7 @@ export class Pika {
         ...v,
       };
     } catch (e) {
-      console.error("[pika] Failed to decode ID", id);
+      error("Failed to decode ID", id);
       throw e;
     }
   }

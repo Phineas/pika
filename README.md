@@ -1,6 +1,6 @@
 # pika
 
-If Stripe IDs & Snowflake IDs had a baby, it'd be pika - the last ID system you'll ever need, combining pragmatism with functionality.
+Combine Stripe IDs with Snowflake IDs and you get... pika! - the last ID system you'll ever need, combining pragmatism with functionality.
 
 Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 
@@ -14,6 +14,12 @@ Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 - Shorter than UUIDs
 - Standalone
 - Option to be cryptographically secure
+
+## Disadvantages / Trade-offs vs. Snowflakes
+
+- Unable to sequence by integer (pikas are strings)
+- Slower generation (by a few nanoseconds - pika is 1m ops/sec vs snowflake 1.6m ops/sec)
+- Slightly larger sizes (pikas are ~28 bytes vs Snowflake's 8 bytes)
 
 ## The ID
 

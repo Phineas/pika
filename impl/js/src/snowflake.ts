@@ -1,6 +1,7 @@
 import { networkInterfaces } from "os";
-type FromEpoch = number | bigint | Date;
+import { warn } from "./logger";
 
+export type FromEpoch = number | bigint | Date;
 interface SnowflakeGenOpts {
   timestamp?: FromEpoch;
 }
@@ -31,7 +32,6 @@ interface DeconstructedSnowflake {
  *           number of ms since epoch            node id      sequence
  * ```
  */
-
 export class Snowflake {
   /**
    * Snowflakes generated are derived from this epoch
@@ -109,10 +109,7 @@ export class Snowflake {
 
       return BigInt(parseInt(mac.split(":").join(""), 16) % 1024);
     } catch (e) {
-      console.warn(
-        "[pika] Failed to compute node ID, falling back to 0. Error:\n",
-        e
-      );
+      warn("Failed to compute node ID, falling back to 0. Error:\n", e);
       return 0n;
     }
   }
