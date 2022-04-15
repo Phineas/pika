@@ -1,5 +1,5 @@
-import { error, warn } from "./logger";
-import { FromEpoch, Snowflake } from "./snowflake";
+import {error, warn} from './logger';
+import {FromEpoch, Snowflake} from './snowflake';
 
 export interface PikaPrefixRecord<P extends string> {
 	prefix: P;
@@ -28,12 +28,11 @@ const VALID_PREFIX = /^[a-z0-9_]+$/i;
 const DEFAULT_EPOCH = 1640995200000n; // Jan 1 2022
 
 type PrefixInit<V extends string> = V | PikaPrefixRecord<V>;
+type LowercasePrefixInit<V extends string> = Lowercase<V> extends V
+	? PrefixInit<V>
+	: PrefixInit<Lowercase<V>>;
 
-type PullPrefixes<T extends readonly PrefixInit<string>[]> =
-	| Extract<T[number], string>
-	| Extract<T[number], PikaPrefixRecord<string>>["prefix"];
-
-export class Pika<V extends string, T extends readonly [PrefixInit<V>, ...PrefixInit<V>[]]> {
+export class Pika<V extends string> {
 	prefixes: Record<string, PikaPrefixRecord<V>> = {};
 	#snowflake: Snowflake;
 	#suppressPrefixWarnings = false;
@@ -44,37 +43,36 @@ export class Pika<V extends string, T extends readonly [PrefixInit<V>, ...Prefix
 	 * @param opts misc. options to initialize pika with
 	 */
 	constructor(
-		prefixes: Lowercase<PullPrefixes<T>> extends PullPrefixes<T>
-			? T
-			: // Prefixes must be lowercase at a type level
-			  never,
-		opts: PikaInitializationOptions = {}
+		prefixes: readonly LowercasePrefixInit<V>[],
+		opts: PikaInitializationOptions = {},
 	) {
 		this.#snowflake = new Snowflake(opts.epoch || DEFAULT_EPOCH);
 		this.#suppressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
 
 		this.prefixes = prefixes.reduce(
-			(a, p) => (typeof p === "string" ? { ...a, [p]: { prefix: p } } : { ...a, p }),
-			{}
+			(a, p) => (typeof p === 'string' ? {...a, [p]: {prefix: p}} : {...a, p}),
+			{},
 		);
 	}
 
-	gen(prefix: PullPrefixes<T>) {
+	gen(prefix: V) {
 		// prefix = prefix.toLowerCase();
 
 		if (!VALID_PREFIX.test(prefix)) {
 			throw TypeError(
-				`invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`
+				`invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`,
 			);
 		}
 
 		if (!this.prefixes[prefix] && !this.#suppressPrefixWarnings)
 			warn(
-				`Unregistered prefix (${prefix}) was used. This can cause unknown behavior - see <> for details.`
+				`Unregistered prefix (${prefix}) was used. This can cause unknown behavior - see <> for details.`,
 			);
 
 		const snowflake = this.#snowflake.gen();
-		return `${prefix.toLowerCase()}_${Buffer.from(snowflake).toString("base64url")}`;
+		return `${prefix.toLowerCase()}_${Buffer.from(snowflake).toString(
+			'base64url',
+		)}`;
 	}
 
 	/**
@@ -86,15 +84,16 @@ export class Pika<V extends string, T extends readonly [PrefixInit<V>, ...Prefix
 
 	public decode(id: V): DecodedPika<V> {
 		try {
-			const s = id.split("_");
+			const s = id.split('_');
 			const tail = s[s.length - 1];
-			const prefix = s.slice(0, s.length - 1).join("_");
+			const prefix = s.slice(0, s.length - 1).join('_');
 
-			const sf = tail.split("_").pop();
-			if (!sf) throw Error("attempted to decode invalid pika; tail was corrupt");
+			const sf = tail.split('_').pop();
+			if (!sf)
+				throw Error('attempted to decode invalid pika; tail was corrupt');
 
-			const { id: snowflake, ...v } = this.#snowflake.deconstruct(
-				Buffer.from(sf, "base64url").toString()
+			const {id: snowflake, ...v} = this.#snowflake.deconstruct(
+				Buffer.from(sf, 'base64url').toString(),
 			);
 
 			return {
@@ -106,7 +105,7 @@ export class Pika<V extends string, T extends readonly [PrefixInit<V>, ...Prefix
 				...v,
 			};
 		} catch (e) {
-			error("Failed to decode ID", id);
+			error('Failed to decode ID', id);
 			throw e;
 		}
 	}
