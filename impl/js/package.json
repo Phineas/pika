@@ -1,37 +1,37 @@
 {
-  "name": "pika-id",
-  "version": "1.0.0",
-  "description": "The pragmatic ID system",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "files": [
-    "package.json",
-    "dist"
-  ],
-  "scripts": {
-    "build": "yarn tsup src/index.ts --dts --format cjs,esm",
-    "release": "yarn release && yarn publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hopinc/pika.git"
-  },
-  "keywords": [
-    "id",
-    "snowflake"
-  ],
-  "author": "Phineas <phin@hop.io> (https://phineas.io)",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/hopinc/pika/issues"
-  },
-  "homepage": "https://github.com/hopinc/pika#readme",
-  "devDependencies": {
-    "@types/node": "^17.0.23",
-    "benchmark": "^2.1.4",
-    "tsup": "^5.12.5",
-    "typescript": "^4.6.3"
-  },
-  "dependencies": {}
+	"name": "pika-id",
+	"version": "1.0.0",
+	"description": "The pragmatic ID system",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"files": [
+		"package.json",
+		"dist"
+	],
+	"scripts": {
+		"build": "yarn tsup src/index.ts --dts --format cjs,esm",
+		"release": "yarn release && yarn publish"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hopinc/pika.git"
+	},
+	"keywords": [
+		"id",
+		"snowflake"
+	],
+	"author": "Phineas <phin@hop.io> (https://phineas.io)",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/hopinc/pika/issues"
+	},
+	"homepage": "https://github.com/hopinc/pika#readme",
+	"devDependencies": {
+		"@types/node": "^17.0.23",
+		"benchmark": "^2.1.4",
+		"prettier": "^2.6.2",
+		"tsup": "^5.12.5",
+		"typescript": "^4.6.3"
+	}
 }
