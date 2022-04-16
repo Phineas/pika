@@ -1,6 +1,6 @@
 {
   "name": "pika-id",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The pragmatic ID system",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
