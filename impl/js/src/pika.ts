@@ -39,7 +39,6 @@ export class Pika<V extends string> {
   #suppressPrefixWarnings = false;
 
   /**
-   * See
    * @param prefixes a list of PikaPrefixRecords to initialize pika with
    * @param opts misc. options to initialize pika with
    */
