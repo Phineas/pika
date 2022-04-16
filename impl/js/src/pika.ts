@@ -34,7 +34,7 @@ type LowercasePrefixInit<V extends string> = Lowercase<V> extends V
   : PrefixInit<Lowercase<V>>;
 
 export class Pika<V extends string> {
-  prefixes: Record<string, PikaPrefixRecord<V>> = {};
+  public readonly prefixes: Record<string, PikaPrefixRecord<V>> = {};
   #snowflake: Snowflake;
   #suppressPrefixWarnings = false;
 
