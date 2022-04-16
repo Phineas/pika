@@ -23,7 +23,7 @@ Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 
 ## Implementations
 
-[JS (TypeScript)](ht) - Fully typed, optimized, 0 deps
+[JS (TypeScript)](https://github.com/hopinc/pika/tree/main/impl/js) - Fully typed, optimized, 0 deps
 
 ## The ID
 
