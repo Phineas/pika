@@ -18,7 +18,7 @@ Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 ## Disadvantages / Trade-offs vs. Snowflakes
 
 - Unable to sequence by integer (pikas are strings)
-- Slower generation (by a few nanoseconds - pika is 1m ops/sec vs snowflake 1.6m ops/sec)
+- Slower generation (by a few nanoseconds - pika is 1.5m ops/sec vs snowflake 2m ops/sec on an M1, however all Snowflakes and Pikas have a theoretical limit of generating a maximum of 1,024,000 IDs per node per second, so there won't be a difference in throughput either way)
 - Slightly larger sizes (pikas are ~28 bytes vs Snowflake's 8 bytes)
 
 ## Implementations

@@ -52,6 +52,12 @@ export class Snowflake {
   #seq = 0n;
 
   /**
+   * Last timestamp of the last time the sequence was exhausted
+   * @internal
+   */
+  #lastSequenceExhaustion: number = 0;
+
+  /**
    * @param epoch the base epoch to use
    * @param nodeId optionally pass a static node identifier (0-1023)
    */
@@ -65,14 +71,22 @@ export class Snowflake {
   }
 
   public gen({ timestamp = Date.now() }: SnowflakeGenOpts = {}): string {
-    timestamp = this.normalizeEpoch(timestamp);
+    const nTimestamp = this.normalizeEpoch(timestamp);
 
-    const seq = this.#seq > 4095n ? (this.#seq = 0n) : this.#seq++;
+    if (this.#seq === 4095n && timestamp === this.#lastSequenceExhaustion) {
+      // purposely blocking
+      while (Date.now() - timestamp < 1) {
+        continue;
+      }
+    }
+
+    this.#seq = this.#seq >= 4095n ? 0n : this.#seq + 1n;
+    if (this.#seq === 4095n) this.#lastSequenceExhaustion = Date.now();
 
     return (
-      ((timestamp - this.#epoch) << 22n) | // millis since epoch
+      ((nTimestamp - this.#epoch) << 22n) | // millis since epoch
       ((this.#nodeId & 0b1111111111n) << 12n) |
-      seq
+      this.#seq
     ).toString();
   }
 
