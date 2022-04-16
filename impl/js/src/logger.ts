@@ -1,4 +1,4 @@
-const PREFIX = `[pika]`;
+const PREFIX = "[pika]";
 
 export const warn = (...args: unknown[]) => {
   console.warn(`${PREFIX}`, ...args);

@@ -21,6 +21,10 @@ Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 - Slower generation (by a few nanoseconds - pika is 1m ops/sec vs snowflake 1.6m ops/sec)
 - Slightly larger sizes (pikas are ~28 bytes vs Snowflake's 8 bytes)
 
+## Implementations
+
+[JS (TypeScript)](ht) - Fully typed, optimized, 0 deps
+
 ## The ID
 
 Pika IDs consist of 2 sections: the type prefix and the tail, separated by an underscore.

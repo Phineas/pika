@@ -107,7 +107,7 @@ export class Pika<V extends string> {
         version: 1,
         ...v,
       };
-    } catch (e) {
+    } catch (e: unknown) {
       error("Failed to decode ID", id);
       throw e;
     }
