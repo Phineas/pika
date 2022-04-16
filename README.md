@@ -39,7 +39,7 @@ Example of a normal decoded tail:
 `129688685040889861`
 
 Example of a cryptographically secure decoded tail:
-`s_129688685040889861_387d0775128c383fa8fbf5fd9863b84aba216bcc6872a877`
+`s_387d0775128c383fa8fbf5fd9863b84aba216bcc6872a877_1296886850408898617`
 
 ## Type Prefix Atomicity
 
