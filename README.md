@@ -37,13 +37,13 @@ Type prefixes should be lowercase, short, alphanumeric strings. If you have an o
 
 ### Tail
 
-The tail is the part that comes after the underscore (e.g. `MTI5Njg4Njg1MDQwODg5ODYx`). Usually, this is just a base64-encoded Snowflake ID, however, if the pika is cryptographically secure, then the base64 decoded string value will start with an `s_` prefix, followed by the Snowflake ID, then followed by another underscore and a cryptographically random string.
+The tail is the part that comes after the underscore (e.g. `MTI5Njg4Njg1MDQwODg5ODYx`). Usually, this is just a base64-encoded Snowflake ID, however, if the pika is cryptographically secure, then the base64 decoded string value will start with an `s_` prefix, followed by a cryptographically random string, then followed by another underscore and the Snowflake ID.
 
 Example of a normal decoded tail:
 `129688685040889861`
 
 Example of a cryptographically secure decoded tail:
-`s_387d0775128c383fa8fbf5fd9863b84aba216bcc6872a877_1296886850408898617`
+`s_387d0775128c383fa8fbf5fd9863b84aba216bcc6872a877_129688685040889861`
 
 ## Type Prefix Atomicity
 
