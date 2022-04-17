@@ -42,6 +42,7 @@ const pika = new Pika(
     /**
      * Optional initialization parameters:
      * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
+     * nodeId: bigint | number - see below
      * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
      * disableLowercase: boolean - don't require prefixes to be lowercase
      **/
@@ -55,4 +56,16 @@ pika.gen("user");
 // Generate a secure id, as registered above
 pika.gen("sk");
 // => sk_c19iMGI0NTM4ZjU3ZThjYTIyZThjNjNlMTgwOTg5MWMyM18zODA2NTE5MjcwNDc5NDYyNA
+```
+
+## Node IDs
+
+By default, Node IDs are calculated by finding the MAC address of the first public network interface device, then calculating the modulo against 1024.
+
+This works well for smaller systems, but if you have a lot of nodes generating Snowflakes, then collision is possible. In this case, you should create an internal singleton service which keeps a rolling count of the assigned node IDs - from 1 to 1023. Then, services that generate Pikas should call this service to get assigned a node ID.
+
+You can then pass in the node ID when initializing Pika like this:
+
+```ts
+const p = new Pika([], { nodeId: customNodeId });
 ```

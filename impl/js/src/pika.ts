@@ -1,4 +1,5 @@
 import { randomBytes } from "crypto";
+import { networkInterfaces } from "os";
 import { error, warn } from "./logger";
 import { FromEpoch, Snowflake } from "./snowflake";
 
@@ -21,6 +22,7 @@ export interface DecodedPika<P extends string> {
 
 interface PikaInitializationOptions {
   epoch?: FromEpoch;
+  nodeId?: number;
   suppressPrefixWarnings?: boolean;
   disableLowercase?: boolean;
 }
@@ -39,14 +41,21 @@ export class Pika<V extends string> {
   #suppressPrefixWarnings = false;
 
   /**
+   * The generated or passed in node ID for this Pika instance
+   * @internal
+   */
+  #nodeId: bigint;
+
+  /**
    * @param prefixes a list of PikaPrefixRecords to initialize pika with
    * @param opts misc. options to initialize pika with
    */
   constructor(
     prefixes: readonly LowercasePrefixInit<V>[],
-    opts: PikaInitializationOptions = {}
+    { nodeId, ...opts }: PikaInitializationOptions = {}
   ) {
-    this.#snowflake = new Snowflake(opts.epoch || DEFAULT_EPOCH);
+    this.#nodeId = nodeId ? BigInt(nodeId) % 1024n : this.computeNodeId();
+    this.#snowflake = new Snowflake(opts.epoch || DEFAULT_EPOCH, this.#nodeId);
     this.#suppressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
 
     this.prefixes = prefixes.reduce(
@@ -109,6 +118,29 @@ export class Pika<V extends string> {
     } catch (e: unknown) {
       error("Failed to decode ID", id);
       throw e;
+    }
+  }
+
+  /**
+   * Derives this machine's node ID from the MAC address of the first
+   * public network interface it finds
+   * @returns The computed node ID (0-1023)
+   */
+  private computeNodeId(): bigint {
+    try {
+      const interfaces = Object.values(networkInterfaces());
+      const firstValidInterface = interfaces.filter(
+        (iface) => iface && iface[0].mac !== "00:00:00:00:00:00"
+      )[0];
+
+      if (!firstValidInterface) throw new Error("no valid mac address found");
+
+      const mac = firstValidInterface[0].mac;
+
+      return BigInt(parseInt(mac.split(":").join(""), 16) % 1024);
+    } catch (e) {
+      warn("Failed to compute node ID, falling back to 0. Error:\n", e);
+      return 0n;
     }
   }
 }

@@ -1,6 +1,3 @@
-import { networkInterfaces } from "os";
-import { warn } from "./logger";
-
 export type FromEpoch = number | bigint | Date;
 interface SnowflakeGenOpts {
   timestamp?: FromEpoch;
@@ -40,7 +37,7 @@ export class Snowflake {
   #epoch: bigint;
 
   /**
-   * The generated or passed in node ID for this Snowflake instance
+   * Passed in node ID for this Snowflake instance
    * @internal
    */
   #nodeId: bigint;
@@ -61,9 +58,9 @@ export class Snowflake {
    * @param epoch the base epoch to use
    * @param nodeId optionally pass a static node identifier (0-1023)
    */
-  constructor(epoch: FromEpoch, nodeId?: number | bigint) {
+  constructor(epoch: FromEpoch, nodeId: number | bigint) {
     this.#epoch = this.normalizeEpoch(epoch);
-    this.#nodeId = nodeId ? BigInt(nodeId) % 1024n : this.computeNodeId();
+    this.#nodeId = BigInt(nodeId);
   }
 
   public get nodeId(): number {
@@ -103,28 +100,5 @@ export class Snowflake {
 
   private normalizeEpoch(epoch: FromEpoch): bigint {
     return BigInt(epoch instanceof Date ? epoch.getTime() : epoch);
-  }
-
-  /**
-   * Derives this machine's node ID from the MAC address of the first
-   * public network interface it finds
-   * @returns The computed node ID (0-1023)
-   */
-  private computeNodeId(): bigint {
-    try {
-      const interfaces = Object.values(networkInterfaces());
-      const firstValidInterface = interfaces.filter(
-        (iface) => iface && iface[0].mac !== "00:00:00:00:00:00"
-      )[0];
-
-      if (!firstValidInterface) throw new Error("no valid mac address found");
-
-      const mac = firstValidInterface[0].mac;
-
-      return BigInt(parseInt(mac.split(":").join(""), 16) % 1024);
-    } catch (e) {
-      warn("Failed to compute node ID, falling back to 0. Error:\n", e);
-      return 0n;
-    }
   }
 }
