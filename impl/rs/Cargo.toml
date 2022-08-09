@@ -3,6 +3,8 @@ name = "pika"
 version = "0.1.0"
 edition = "2021"
 readme="./README.md"
+description="Pika ID implementation in Rust"
+license = "MPL-2.0"
 
 [dependencies]
 base64 = "0.13.0"
