@@ -97,8 +97,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "pika"
-version = "0.1.0"
+name = "pika-id"
+version = "0.1.1"
 dependencies = [
  "base64",
  "mac_address",
