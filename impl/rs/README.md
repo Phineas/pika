@@ -4,7 +4,7 @@ Rust implementation for Pika
 
 ## Install
 
-```ini
+```toml
 [dependencies]
 pika-id = "0.1.0"
 ```
