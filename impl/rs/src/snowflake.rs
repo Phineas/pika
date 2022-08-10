@@ -82,12 +82,11 @@ mod test {
     }
 
     #[test]
-
     fn generate_snowflakes() {
         let mut i = 0;
         let sf = &mut super::Snowflake::new_with_nodeid(650_153_600_000, 1023);
 
-        while i < 10 {
+        while i < 4097 {
             let snowflake = sf.gen();
 
             let deconstruct = sf.decode(snowflake.as_str());
