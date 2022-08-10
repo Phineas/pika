@@ -1,6 +1,6 @@
 [package]
 name = "pika"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 readme="./README.md"
 description="Pika ID implementation in Rust"
