@@ -39,15 +39,15 @@ impl Snowflake {
             }
         }
 
+        let sf = ((timestamp - self.epoch) << 22)
+            | (u64::from(self.node_id) << 12)
+            | u64::from(self.seq);
+
         self.seq = if self.seq >= 4095 { 0 } else { self.seq + 1 };
 
         if self.seq == 4095 {
             self.last_sequence_exhaustion = timestamp;
         }
-
-        let sf = ((timestamp - self.epoch) << 22)
-            | (u64::from(self.node_id) << 12)
-            | u64::from(self.seq);
 
         sf.to_string()
     }
@@ -69,8 +69,6 @@ impl Snowflake {
 }
 
 mod test {
-    use super::Snowflake;
-
     #[test]
     fn generate_snowflake() {
         // if the node_id >= 1024 it will go to 0?
@@ -85,15 +83,19 @@ mod test {
 
     #[test]
     fn generate_snowflakes() {
-        let mut i = 0;
-        let mut sf = Snowflake::new_with_nodeid(650_153_600_000, 1023);
+        let mut sf = super::Snowflake::new_with_nodeid(650_153_600_000, 1023);
 
-        while i < 400 {
-            let snowflake = sf.gen();
+        // when the seq is 4096, the next snowflake will be 0
+        let snowflakes: Vec<String> = (0..4096).map(|_| sf.gen()).collect();
+        let last_snowflake = sf.gen();
 
+        for (sequence, snowflake) in snowflakes.iter().enumerate() {
             let deconstruct = sf.decode(snowflake.as_str());
-            println!("{:?}", deconstruct);
-            i = i + 1;
+
+            assert_eq!(deconstruct.seq, sequence as u64);
         }
+
+        let deconstruct = sf.decode(last_snowflake.as_str());
+        assert_eq!(deconstruct.seq, 0);
     }
 }
