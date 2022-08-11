@@ -6,7 +6,7 @@ Rust implementation for Pika
 
 ```toml
 [dependencies]
-pika = "0.1.0"
+pika = "0.1"
 ```
 
 ## Basic Usage
