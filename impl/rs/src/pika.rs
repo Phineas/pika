@@ -12,7 +12,7 @@ pub struct PrefixRecord {
 }
 
 #[derive(Debug)]
-pub struct DecodedPikaId {
+pub struct DecodedPika {
     pub prefix: String,
     pub tail: String,
     pub snowflake: u64,
@@ -73,7 +73,7 @@ impl Pika {
         (first_mac % 1024) as u32
     }
 
-    pub fn deconstruct(&self, id: &str) -> DecodedPikaId {
+    pub fn deconstruct(&self, id: &str) -> DecodedPika {
         let s = id.split('_').collect::<Vec<&str>>();
         let prefix = s[0].to_string();
         let tail = s[1].to_string();
@@ -86,7 +86,7 @@ impl Pika {
             .decode(&String::from_utf8_lossy(&decoded_tail).to_string());
         let stringified_tail = String::from_utf8_lossy(&decoded_tail).to_string();
 
-        DecodedPikaId {
+        DecodedPika {
             prefix,
             tail,
             snowflake: stringified_tail.parse::<u64>().unwrap(),
@@ -152,7 +152,7 @@ mod tests {
 
         // cant statically check because mac address is per device
         assert_eq!(deconstructed.node_id, Pika::compute_node_id());
-        assert_eq!(deconstructed.seq, 1);
+        assert_eq!(deconstructed.seq, 0);
         assert_eq!(deconstructed.version, 1);
         assert_eq!(deconstructed.epoch, 1_650_153_600_000);
     }
@@ -178,7 +178,7 @@ mod tests {
         let deconstructed = pika.deconstruct(&id);
 
         assert_eq!(deconstructed.node_id, 622);
-        assert_eq!(deconstructed.seq, 1);
+        assert_eq!(deconstructed.seq, 0);
         assert_eq!(deconstructed.version, 1);
         assert_eq!(deconstructed.epoch, 1_650_153_600_000);
     }

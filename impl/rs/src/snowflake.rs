@@ -1,6 +1,6 @@
 use crate::utils::now_timestamp;
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug)]
 pub struct Snowflake {
     epoch: u64,
     node_id: u32,
@@ -8,7 +8,7 @@ pub struct Snowflake {
     last_sequence_exhaustion: u64,
 }
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug)]
 pub struct DecodedSnowflake {
     pub id: u64,
     pub timestamp: u64,
@@ -28,16 +28,20 @@ impl Snowflake {
     }
 
     #[inline]
-    pub fn gen(self) -> String {
+    pub fn gen(&mut self) -> String {
         self.gen_with_ts(now_timestamp())
     }
 
-    pub fn gen_with_ts(mut self, timestamp: u64) -> String {
+    pub fn gen_with_ts(&mut self, timestamp: u64) -> String {
         if self.seq >= 4095 && timestamp == self.last_sequence_exhaustion {
             while now_timestamp() - timestamp < 1 {
                 continue;
             }
         }
+
+        let sf = ((timestamp - self.epoch) << 22)
+            | (u64::from(self.node_id) << 12)
+            | u64::from(self.seq);
 
         self.seq = if self.seq >= 4095 { 0 } else { self.seq + 1 };
 
@@ -45,14 +49,10 @@ impl Snowflake {
             self.last_sequence_exhaustion = timestamp;
         }
 
-        let sf = ((timestamp - self.epoch) << 22)
-            | (u64::from(self.node_id) << 12)
-            | u64::from(self.seq);
-
         sf.to_string()
     }
 
-    pub fn decode(self, sf: &str) -> DecodedSnowflake {
+    pub fn decode(&self, sf: &str) -> DecodedSnowflake {
         let sf = sf.parse::<u64>().unwrap();
         let timestamp = (sf >> 22) + self.epoch;
         let node_id = (sf >> 12) & 0b11_1111_1111;
@@ -72,12 +72,30 @@ mod test {
     #[test]
     fn generate_snowflake() {
         // if the node_id >= 1024 it will go to 0?
-        let sf = super::Snowflake::new_with_nodeid(650_153_600_000, 1023);
+        let mut sf = super::Snowflake::new_with_nodeid(650_153_600_000, 1023);
         let snowflake = sf.gen();
 
-        let deconstruct = sf.decode(&snowflake);
+        let deconstruct = sf.decode(snowflake.as_str());
 
         assert_eq!(deconstruct.epoch, 650_153_600_000);
         assert_eq!(deconstruct.node_id, 1023);
+    }
+
+    #[test]
+    fn generate_snowflakes() {
+        let mut sf = super::Snowflake::new_with_nodeid(650_153_600_000, 1023);
+
+        // when the seq is 4096, the next snowflake will be 0
+        let snowflakes: Vec<String> = (0..4096).map(|_| sf.gen()).collect();
+        let last_snowflake = sf.gen();
+
+        for (sequence, snowflake) in snowflakes.iter().enumerate() {
+            let deconstruct = sf.decode(snowflake.as_str());
+
+            assert_eq!(deconstruct.seq, sequence as u64);
+        }
+
+        let deconstruct = sf.decode(last_snowflake.as_str());
+        assert_eq!(deconstruct.seq, 0);
     }
 }
