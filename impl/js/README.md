@@ -23,30 +23,30 @@ import Pika from "pika-id";
 
 // Initialize Pika - do this once, then reuse the instance
 const pika = new Pika(
-  // Define prefix types
-  // You can specify either a string or an object per prefix
-  // Make sure prefixes are lowercase
-  [
-    "user",
-    {
-      prefix: "ch",
-      description: "Channels",
-    },
-    {
-      prefix: "sk",
-      description: "Secret key",
-      secure: true, // pika secure id
-    },
-  ],
-  {
-    /**
-     * Optional initialization parameters:
-     * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
-     * nodeId: bigint | number - see below
-     * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
-     * disableLowercase: boolean - don't require prefixes to be lowercase
-     **/
-  }
+	// Define prefix types
+	// You can specify either a string or an object per prefix
+	// Make sure prefixes are lowercase
+	[
+		"user",
+		{
+			prefix: "ch",
+			description: "Channels",
+		},
+		{
+			prefix: "sk",
+			description: "Secret key",
+			secure: true, // pika secure id
+		},
+	],
+	{
+		/**
+		 * Optional initialization parameters:
+		 * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
+		 * nodeId: bigint | number - see below
+		 * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
+		 * disableLowercase: boolean - don't require prefixes to be lowercase
+		 **/
+	}
 );
 
 // Generate a pika id
@@ -68,4 +68,15 @@ You can then pass in the node ID when initializing Pika like this:
 
 ```ts
 const p = new Pika([], { nodeId: customNodeId });
+```
+
+## Benchmarks
+
+<small>See [bench/gen.js](https://github.com/hopinc/pika/blob/main/impl/js/bench/gen.js) for benchmark implementation</small>
+
+The benchmark below was ran on a 2021 MacBook Pro 14" with an m1 Pro chip and 16gb of memory.
+
+```
+Pika#gen x 1,370,869 ops/sec ±0.19% (100 runs sampled)
+Snowflake#gen x 2,015,012 ops/sec ±1.88% (97 runs sampled)
 ```
