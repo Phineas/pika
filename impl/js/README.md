@@ -23,30 +23,30 @@ import Pika from "pika-id";
 
 // Initialize Pika - do this once, then reuse the instance
 const pika = new Pika(
-	// Define prefix types
-	// You can specify either a string or an object per prefix
-	// Make sure prefixes are lowercase
-	[
-		"user",
-		{
-			prefix: "ch",
-			description: "Channels",
-		},
-		{
-			prefix: "sk",
-			description: "Secret key",
-			secure: true, // pika secure id
-		},
-	],
-	{
-		/**
-		 * Optional initialization parameters:
-		 * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
-		 * nodeId: bigint | number - see below
-		 * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
-		 * disableLowercase: boolean - don't require prefixes to be lowercase
-		 **/
-	}
+  // Define prefix types
+  // You can specify either a string or an object per prefix
+  // Make sure prefixes are lowercase
+  [
+    "user",
+    {
+      prefix: "ch",
+      description: "Channels",
+    },
+    {
+      prefix: "sk",
+      description: "Secret key",
+      secure: true, // pika secure id
+    },
+  ],
+  {
+    /**
+     * Optional initialization parameters:
+     * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
+     * nodeId: bigint | number - see below
+     * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
+     * disableLowercase: boolean - don't require prefixes to be lowercase
+     **/
+  }
 );
 
 // Generate a pika id
