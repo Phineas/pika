@@ -1,9 +1,9 @@
 import { randomBytes } from "crypto";
 import { networkInterfaces } from "os";
 import { error, warn } from "./logger";
-import { FromEpoch, Snowflake } from "./snowflake";
+import { EpochResolvable, Snowflake } from "./snowflake";
 
-export interface PikaPrefixRecord<P extends string> {
+export interface PikaPrefixDefinition<P extends string> {
   prefix: P;
   description?: string;
   secure?: boolean;
@@ -11,34 +11,67 @@ export interface PikaPrefixRecord<P extends string> {
 }
 
 export interface DecodedPika<P extends string> {
-  prefix: string;
+  prefix: P;
+
+  /**
+   * The tail after the prefix, which is base64 encoding of the snowflake.
+   *
+   * However, if the pika is cryptographically secure, then the base64 decoded string value will start with an `s_` prefix,
+   * followed by a cryptographically random string, then followed by another underscore and the Snowflake ID.
+   */
   tail: string;
+
+  /**
+   * The snowfake that was generated for this ID
+   */
   snowflake: bigint;
+
+  /**
+   * The ID this Pika was generated from.
+   */
   nodeId: number;
+
+  /**
+   * A rolling number between 1 to 4096 to introduce entropy.
+   * Allows for doing 4096 ids per ms per node.
+   */
   seq: number;
+
+  /**
+   * The version of the pika encoding.
+   */
   version: 1;
-  prefix_record: PikaPrefixRecord<P> | undefined;
+
+  /**
+   * The definition for this prefix
+   */
+  prefixRecord: PikaPrefixDefinition<P>;
+
+  /**
+   * @deprecated use `.prefixRecord` instead
+   */
+  prefix_record: PikaPrefixDefinition<P>;
 }
 
-interface PikaInitializationOptions {
-  epoch?: FromEpoch;
+export interface PikaInitializationOptions {
+  epoch?: EpochResolvable;
   nodeId?: number;
   suppressPrefixWarnings?: boolean;
   disableLowercase?: boolean;
 }
 
-const VALID_PREFIX = /^[a-z0-9_]+$/i;
-const DEFAULT_EPOCH = 1640995200000n; // Jan 1 2022
+export const VALID_PREFIX = /^[a-z0-9_]+$/i;
+export const DEFAULT_EPOCH = 1640995200000n; // Jan 1 2022
 
-type PrefixInit<V extends string> = V | PikaPrefixRecord<V>;
-type LowercasePrefixInit<V extends string> = Lowercase<V> extends V
+export type PrefixInit<V extends string> = V | PikaPrefixDefinition<V>;
+export type LowercasePrefixInit<V extends string> = Lowercase<V> extends V
   ? PrefixInit<V>
   : PrefixInit<Lowercase<V>>;
 
-export class Pika<V extends string> {
-  public readonly prefixes: Record<string, PikaPrefixRecord<V>> = {};
+export class Pika<Prefixes extends string> {
+  public readonly prefixes: Record<string, PikaPrefixDefinition<Prefixes>> = {};
   readonly #snowflake: Snowflake;
-  #suppressPrefixWarnings = false;
+  readonly #suppressPrefixWarnings: boolean;
 
   /**
    * The generated or passed in node ID for this Pika instance
@@ -51,40 +84,48 @@ export class Pika<V extends string> {
    * @param opts misc. options to initialize pika with
    */
   constructor(
-    prefixes: readonly LowercasePrefixInit<V>[],
+    prefixes: readonly LowercasePrefixInit<Prefixes>[],
     { nodeId, ...opts }: PikaInitializationOptions = {}
   ) {
     this.#nodeId = nodeId ? BigInt(nodeId) % 1024n : this.computeNodeId();
     this.#snowflake = new Snowflake(opts.epoch || DEFAULT_EPOCH, this.#nodeId);
     this.#suppressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
 
-    this.prefixes = prefixes.reduce(
-      (a, p) =>
-        typeof p === "string"
-          ? { ...a, [p]: { prefix: p } }
-          : { ...a, [p.prefix]: p },
-      {}
-    );
+    this.prefixes = prefixes.reduce((prefixes, definition) => {
+      if (typeof definition === "string") {
+        return {
+          ...prefixes,
+          [definition]: { prefix: definition },
+        };
+      }
+
+      return {
+        ...prefixes,
+        [definition.prefix]: definition,
+      };
+    }, {});
   }
 
-  gen(prefix: V) {
+  gen<Prefix extends Prefixes>(prefix: Prefix): `${Prefix}_${string}` {
     if (!VALID_PREFIX.test(prefix)) {
       throw TypeError(
         `invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`
       );
     }
 
-    if (!this.prefixes[prefix] && !this.#suppressPrefixWarnings)
+    if (!this.prefixes[prefix] && !this.#suppressPrefixWarnings) {
       warn(
         `Unregistered prefix (${prefix}) was used. This can cause unknown behavior - see https://github.com/hopinc/pika/tree/main/impl/js for details.`
       );
+    }
 
     const snowflake = this.#snowflake.gen();
+
     return `${prefix.toLowerCase()}_${Buffer.from(
       (this.prefixes[prefix]?.secure
         ? `s_${randomBytes(16).toString("hex")}_`
         : "") + snowflake
-    ).toString("base64url")}`;
+    ).toString("base64url")}` as `${Prefix}_${string}`;
   }
 
   /**
@@ -94,16 +135,18 @@ export class Pika<V extends string> {
     return this.#snowflake.gen();
   }
 
-  public decode(id: string): DecodedPika<V> {
+  public decode(id: string): DecodedPika<Prefixes> {
     try {
       const s = id.split("_");
       const tail = s[s.length - 1];
-      const prefix = s.slice(0, s.length - 1).join("_");
+      const prefix = s.slice(0, s.length - 1).join("_") as Prefixes;
 
       const decodedTail = Buffer.from(tail, "base64").toString();
       const sf = decodedTail.split("_").pop();
-      if (!sf)
+
+      if (!sf) {
         throw Error("attempted to decode invalid pika; tail was corrupt");
+      }
 
       const { id: snowflake, ...v } = this.#snowflake.deconstruct(sf);
 
@@ -111,6 +154,7 @@ export class Pika<V extends string> {
         prefix,
         tail,
         prefix_record: this.prefixes[prefix],
+        prefixRecord: this.prefixes[prefix],
         snowflake,
         version: 1,
         ...v,
@@ -133,7 +177,9 @@ export class Pika<V extends string> {
         (iface) => iface && iface[0].mac !== "00:00:00:00:00:00"
       )[0];
 
-      if (!firstValidInterface) throw new Error("no valid mac address found");
+      if (!firstValidInterface) {
+        throw new Error("no valid mac address found");
+      }
 
       const mac = firstValidInterface[0].mac;
 

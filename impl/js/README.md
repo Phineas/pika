@@ -69,3 +69,14 @@ You can then pass in the node ID when initializing Pika like this:
 ```ts
 const p = new Pika([], { nodeId: customNodeId });
 ```
+
+## Benchmarks
+
+<small>See [bench/gen.js](https://github.com/hopinc/pika/blob/main/impl/js/bench/gen.js) for benchmark implementation</small>
+
+The benchmark below was ran on a 2021 MacBook Pro 14" with an m1 Pro chip and 16gb of memory.
+
+```
+Pika#gen x 1,370,869 ops/sec ±0.19% (100 runs sampled)
+Snowflake#gen x 2,015,012 ops/sec ±1.88% (97 runs sampled)
+```

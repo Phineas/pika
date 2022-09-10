@@ -1,9 +1,10 @@
-export type FromEpoch = number | bigint | Date;
-interface SnowflakeGenOpts {
-  timestamp?: FromEpoch;
+export type EpochResolvable = number | bigint | Date;
+
+export interface SnowflakeGenOptions {
+  timestamp?: EpochResolvable;
 }
 
-interface DeconstructedSnowflake {
+export interface DeconstructedSnowflake {
   id: bigint;
   timestamp: bigint;
   nodeId: number;
@@ -58,7 +59,7 @@ export class Snowflake {
    * @param epoch the base epoch to use
    * @param nodeId optionally pass a static node identifier (0-1023)
    */
-  constructor(epoch: FromEpoch, nodeId: number | bigint) {
+  constructor(epoch: EpochResolvable, nodeId: number | bigint) {
     this.#epoch = this.normalizeEpoch(epoch);
     this.#nodeId = BigInt(nodeId);
   }
@@ -67,7 +68,7 @@ export class Snowflake {
     return Number(this.nodeId);
   }
 
-  public gen({ timestamp = Date.now() }: SnowflakeGenOpts = {}): string {
+  public gen({ timestamp = Date.now() }: SnowflakeGenOptions = {}): string {
     const nTimestamp = this.normalizeEpoch(timestamp);
 
     if (this.#seq === 4095n && timestamp === this.#lastSequenceExhaustion) {
@@ -89,6 +90,7 @@ export class Snowflake {
 
   public deconstruct(id: string | bigint): DeconstructedSnowflake {
     const bigIntId = BigInt(id);
+
     return {
       id: bigIntId,
       timestamp: (bigIntId >> 22n) + this.#epoch,
@@ -98,7 +100,7 @@ export class Snowflake {
     };
   }
 
-  private normalizeEpoch(epoch: FromEpoch): bigint {
+  private normalizeEpoch(epoch: EpochResolvable): bigint {
     return BigInt(epoch instanceof Date ? epoch.getTime() : epoch);
   }
 }
