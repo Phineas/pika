@@ -1,2 +1,2 @@
-import { Pika } from "./pika";
+import {Pika} from './pika';
 export = Pika;
