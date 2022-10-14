@@ -21,6 +21,9 @@ npm i pika-id
 ```ts
 import Pika from 'pika-id';
 
+// Or in CJS
+const {Pika} = require('pika-id');
+
 // Initialize Pika - do this once, then reuse the instance
 const pika = new Pika(
 	// Define prefix types

@@ -1,5 +1,5 @@
 const Benchmark = require('benchmark');
-const Pika = require('../dist');
+const {Pika} = require('../dist');
 
 const suite = new Benchmark.Suite();
 
