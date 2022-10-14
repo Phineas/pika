@@ -19,42 +19,42 @@ npm i pika-id
 ## Basic Usage
 
 ```ts
-import Pika from "pika-id";
+import Pika from 'pika-id';
 
 // Initialize Pika - do this once, then reuse the instance
 const pika = new Pika(
-  // Define prefix types
-  // You can specify either a string or an object per prefix
-  // Make sure prefixes are lowercase
-  [
-    "user",
-    {
-      prefix: "ch",
-      description: "Channels",
-    },
-    {
-      prefix: "sk",
-      description: "Secret key",
-      secure: true, // pika secure id
-    },
-  ],
-  {
-    /**
-     * Optional initialization parameters:
-     * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
-     * nodeId: bigint | number - see below
-     * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
-     * disableLowercase: boolean - don't require prefixes to be lowercase
-     **/
-  }
+	// Define prefix types
+	// You can specify either a string or an object per prefix
+	// Make sure prefixes are lowercase
+	[
+		'user',
+		{
+			prefix: 'ch',
+			description: 'Channels',
+		},
+		{
+			prefix: 'sk',
+			description: 'Secret key',
+			secure: true, // pika secure id
+		},
+	],
+	{
+		/**
+		 * Optional initialization parameters:
+		 * epoch: bigint | number - customize the epoch (millis) that IDs are derived from - by default, this is 1640995200000 (Jan 1 2022)
+		 * nodeId: bigint | number - see below
+		 * suppressPrefixWarnings: boolean - don't warn on undefined prefixes
+		 * disableLowercase: boolean - don't require prefixes to be lowercase
+		 **/
+	},
 );
 
 // Generate a pika id
-pika.gen("user");
+pika.gen('user');
 // => user_Mzc5ODk1NTI4NzgxMTY4NjQ
 
 // Generate a secure id, as registered above
-pika.gen("sk");
+pika.gen('sk');
 // => sk_c19iMGI0NTM4ZjU3ZThjYTIyZThjNjNlMTgwOTg5MWMyM18zODA2NTE5MjcwNDc5NDYyNA
 ```
 
@@ -67,7 +67,24 @@ This works well for smaller systems, but if you have a lot of nodes generating S
 You can then pass in the node ID when initializing Pika like this:
 
 ```ts
-const p = new Pika([], { nodeId: customNodeId });
+const p = new Pika([], {nodeId: customNodeId});
+```
+
+## TypeScript
+
+Pika has strong definitions for TypeScript, including typing all prefix IDs. If you are using TypeScript, you can take advantage of the following utility types.
+
+```ts
+import Pika, {InferPrefixes, InferId} from 'pika-id';
+const pika = new Pika(['nuts', 'bolts']);
+
+// Infer what an ID will look like
+type Id = InferIds<typeof pika>;
+//   ^? `nuts_${string}` | `bolts_${string}`
+
+// Infer what the prefixes are
+type Prefixes = InferPrefixes<typeof pika>;
+//   ^? 'nuts' | 'bolts'
 ```
 
 ## Benchmarks

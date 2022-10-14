@@ -1,2 +1,2 @@
-import { Pika } from "./pika";
-export = Pika;
+export {Pika, Pika as default} from './pika';
+export type {InferIds, InferPrefixes} from './pika';
