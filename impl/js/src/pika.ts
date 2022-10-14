@@ -66,6 +66,12 @@ export const DEFAULT_EPOCH = 1640995200000n; // Jan 1 2022
 export type PrefixInit<V extends string> = V | PikaPrefixDefinition<V>;
 export type LowercasePrefixInit<V extends string> = Lowercase<V> extends V ? PrefixInit<V> : PrefixInit<Lowercase<V>>;
 
+export class InvalidPrefixError extends TypeError {
+	constructor(prefix: string) {
+		super(`invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`);
+	}
+}
+
 export class Pika<Prefixes extends string> {
 	public readonly prefixes: Record<string, PikaPrefixDefinition<Prefixes>> = {};
 	readonly #snowflake: Snowflake;
@@ -87,25 +93,57 @@ export class Pika<Prefixes extends string> {
 		this.#suppressPrefixWarnings = opts.suppressPrefixWarnings ?? false;
 
 		this.prefixes = prefixes.reduce((prefixes, definition) => {
+			const prefix = typeof definition === 'string' ? definition : definition.prefix;
+
+			if (!VALID_PREFIX.test(prefix)) {
+				throw new InvalidPrefixError(prefix);
+			}
+
 			if (typeof definition === 'string') {
 				return {
 					...prefixes,
-					[definition]: {prefix: definition},
+					[definition]: {prefix},
 				};
 			}
 
 			return {
 				...prefixes,
-				[definition.prefix]: definition,
+				[prefix]: definition,
 			};
 		}, {});
 	}
 
+	/**
+	 * Validates something that might be an ID is valid with our prefix set
+	 * @param maybeId the ID to validate
+	 * @param expectPrefix the prefix to expect
+	 * @returns
+	 */
+	validate<T extends Prefixes = Prefixes>(maybeId: string, expectPrefix?: T): maybeId is `${T}_${string}` {
+		if (typeof maybeId !== 'string') {
+			return false;
+		}
+
+		const [prefix, tail = null] = maybeId.split('_', 2);
+
+		if (!tail) {
+			return false;
+		}
+
+		if (expectPrefix && prefix !== expectPrefix) {
+			return false;
+		}
+
+		if (expectPrefix) {
+			return prefix === expectPrefix;
+		}
+
+		return prefix in this.prefixes;
+	}
+
 	gen<Prefix extends Prefixes>(prefix: Prefix): `${Prefix}_${string}` {
 		if (!VALID_PREFIX.test(prefix)) {
-			throw TypeError(
-				`invalid prefix; prefixes must be alphanumeric (a-z0-9_) and may include underscores; received: ${prefix}`,
-			);
+			throw new InvalidPrefixError(prefix);
 		}
 
 		if (!this.prefixes[prefix] && !this.#suppressPrefixWarnings) {
