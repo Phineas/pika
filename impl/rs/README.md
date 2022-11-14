@@ -27,7 +27,7 @@ let prefixes = [
 
 let mut pika = Pika::new(
     prefixes.to_vec(),
-    InitOptions {
+    &InitOptions {
         epoch: Some(1_650_153_600_000),
         node_id: None,
         disable_lowercase: Some(true),
@@ -37,7 +37,7 @@ let mut pika = Pika::new(
 pika.gen("user").unwrap();
     // => user_Mzc5ODk1NTI4NzgxMTY4NjQ
 
-pika.gen("sk").unwrap()
+pika.gen("sk").unwrap();
     // => sk_c19iMGI0NTM4ZjU3ZThjYTIyZThjNjNlMTgwOTg5MWMyM18zODA2NTE5MjcwNDc5NDYyNA
 ```
 
@@ -52,7 +52,7 @@ You can then pass in the node ID when initializing Pika like this:
 ```rs
 let mut pika = Pika::new(
     prefixes.to_vec(),
-    InitOptions {
+    &InitOptions {
         epoch: Some(1_650_153_600_000),
         node_id: custom_node_id,
         disable_lowercase: Some(true),
