@@ -24,7 +24,7 @@ pub struct DecodedPika {
     pub prefix_record: PrefixRecord,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Pika {
     pub prefixes: Vec<PrefixRecord>,
     pub epoch: u64,
