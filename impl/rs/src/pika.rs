@@ -39,6 +39,16 @@ pub struct InitOptions {
     pub disable_lowercase: Option<bool>,
 }
 
+impl Default for InitOptions {
+    fn default() -> Self {
+        InitOptions {
+            epoch: None,
+            node_id: None,
+            disable_lowercase: None,
+        }
+    }
+}
+
 pub const DEFAULT_EPOCH: u64 = 1_640_995_200_000;
 
 impl Pika {
