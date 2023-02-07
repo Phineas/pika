@@ -24,7 +24,7 @@ pub struct DecodedPika {
     pub prefix_record: PrefixRecord,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Pika {
     pub prefixes: Vec<PrefixRecord>,
     pub epoch: u64,
@@ -37,6 +37,16 @@ pub struct InitOptions {
     pub epoch: Option<u64>,
     pub node_id: Option<u32>,
     pub disable_lowercase: Option<bool>,
+}
+
+impl Default for InitOptions {
+    fn default() -> Self {
+        InitOptions {
+            epoch: None,
+            node_id: None,
+            disable_lowercase: None,
+        }
+    }
 }
 
 pub const DEFAULT_EPOCH: u64 = 1_640_995_200_000;
