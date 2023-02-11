@@ -124,7 +124,9 @@ export class Pika<Prefixes extends string> {
 			return false;
 		}
 
-		const [prefix, tail = null] = maybeId.split('_', 2);
+		const s = maybeId.split('_');
+		const tail = s[s.length - 1];
+		const prefix = s.slice(0, s.length - 1).join('_');
 
 		if (!tail) {
 			return false;
