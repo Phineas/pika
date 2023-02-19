@@ -109,7 +109,7 @@ impl Pika {
     }
 
     pub fn gen(&mut self, prefix: &str) -> Result<String, Error> {
-        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32;
+        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && prefix.len() >= 1;
 
         assert!(valid_prefix, "Invalid prefix: {}", prefix);
 
