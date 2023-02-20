@@ -52,15 +52,8 @@ pub const DEFAULT_EPOCH: u64 = 1_640_995_200_000;
 
 impl Pika {
     pub fn new(prefixes: Vec<PrefixRecord>, options: &InitOptions) -> Pika {
-        let epoch = match options.epoch {
-            Some(epoch) => epoch,
-            None => DEFAULT_EPOCH,
-        };
-
-        let node_id = match options.node_id {
-            Some(node_id) => node_id,
-            None => Self::compute_node_id(),
-        };
+        let epoch = options.epoch.unwrap_or(DEFAULT_EPOCH);
+        let node_id = options.node_id.unwrap_or(Self::compute_node_id());
 
         Pika {
             prefixes,
