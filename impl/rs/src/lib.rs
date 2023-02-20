@@ -8,4 +8,5 @@
 
 pub mod pika;
 pub mod snowflake;
+mod base64;
 mod utils;

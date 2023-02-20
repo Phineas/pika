@@ -1,7 +1,6 @@
 use std::io::Error;
 
-use regex::Regex;
-
+use crate::base64::*;
 use crate::snowflake::{self, Snowflake};
 
 #[derive(Clone, Debug)]
@@ -53,15 +52,8 @@ pub const DEFAULT_EPOCH: u64 = 1_640_995_200_000;
 
 impl Pika {
     pub fn new(prefixes: Vec<PrefixRecord>, options: &InitOptions) -> Pika {
-        let epoch = match options.epoch {
-            Some(epoch) => epoch,
-            None => DEFAULT_EPOCH,
-        };
-
-        let node_id = match options.node_id {
-            Some(node_id) => node_id,
-            None => Self::compute_node_id(),
-        };
+        let epoch = options.epoch.unwrap_or(DEFAULT_EPOCH);
+        let node_id = options.node_id.unwrap_or(Self::compute_node_id());
 
         Pika {
             prefixes,
@@ -89,7 +81,7 @@ impl Pika {
         let tail = s[1].to_string();
 
         let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix);
-        let decoded_tail = base64::decode(&tail).unwrap();
+        let decoded_tail = base64_decode(&tail).unwrap();
 
         let snowflake = self
             .snowflake
@@ -110,9 +102,9 @@ impl Pika {
     }
 
     pub fn gen(&mut self, prefix: &str) -> Result<String, Error> {
-        let valid_prefix: Regex = Regex::new(r"^[a-zA-Z0-9]{1,32}$").unwrap();
+        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && prefix.len() >= 1;
 
-        assert!(valid_prefix.is_match(prefix), "Invalid prefix: {}", prefix);
+        assert!(valid_prefix, "Invalid prefix: {}", prefix);
 
         let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix);
 
@@ -126,10 +118,10 @@ impl Pika {
             format!(
                 "{}_s_{}",
                 prefix,
-                base64::encode(random_bytes + &snowflake).replace('=', "")
+                base64_encode(random_bytes + &snowflake).replace('=', "")
             )
         } else {
-            format!("{}_{}", prefix, base64::encode(snowflake).replace('=', ""))
+            format!("{}_{}", prefix, base64_encode(snowflake).replace('=', ""))
         };
 
         Ok(id)
