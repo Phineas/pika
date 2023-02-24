@@ -1,6 +1,6 @@
 use std::io::Error;
 
-use crate::base64::*;
+use crate::base64::{base64_decode, base64_encode};
 use crate::snowflake::{self, Snowflake};
 
 #[derive(Clone, Debug)]
@@ -32,30 +32,21 @@ pub struct Pika {
     snowflake: Snowflake,
 }
 
+#[derive(Default)] // default implementation was identical to std::default::Default
 pub struct InitOptions {
     pub epoch: Option<u64>,
     pub node_id: Option<u32>,
     pub disable_lowercase: Option<bool>,
 }
 
-impl Default for InitOptions {
-    fn default() -> Self {
-        InitOptions {
-            epoch: None,
-            node_id: None,
-            disable_lowercase: None,
-        }
-    }
-}
-
 pub const DEFAULT_EPOCH: u64 = 1_640_995_200_000;
 
 impl Pika {
-    pub fn new(prefixes: Vec<PrefixRecord>, options: &InitOptions) -> Pika {
+    pub fn new(prefixes: Vec<PrefixRecord>, options: &InitOptions) -> Self {
         let epoch = options.epoch.unwrap_or(DEFAULT_EPOCH);
-        let node_id = options.node_id.unwrap_or(Self::compute_node_id());
+        let node_id = options.node_id.unwrap_or_else(Self::compute_node_id);
 
-        Pika {
+        Self {
             prefixes,
             epoch,
             node_id,
@@ -85,7 +76,7 @@ impl Pika {
 
         let snowflake = self
             .snowflake
-            .decode(&String::from_utf8_lossy(&decoded_tail).to_string());
+            .decode(&String::from_utf8_lossy(&decoded_tail));
         let stringified_tail = String::from_utf8_lossy(&decoded_tail).to_string();
 
         DecodedPika {
@@ -102,13 +93,13 @@ impl Pika {
     }
 
     pub fn gen(&mut self, prefix: &str) -> Result<String, Error> {
-        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && prefix.len() >= 1;
+        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && !prefix.is_empty();
 
-        assert!(valid_prefix, "Invalid prefix: {}", prefix);
+        assert!(valid_prefix, "Invalid prefix: {prefix}");
 
         let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix);
 
-        assert!(prefix_record.is_some(), "Prefix not found: {}", prefix);
+        assert!(prefix_record.is_some(), "Prefix not found: {prefix}");
 
         let snowflake = self.snowflake.gen();
 
