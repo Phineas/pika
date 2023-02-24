@@ -12,19 +12,19 @@ pub fn base64_encode(input: String) -> String {
     let mut bits_left = 0;
 
     for byte in input.into_bytes() {
-        buffer = (buffer << 8) | byte as u32;
+        buffer = (buffer << 8) | u32::from(byte);
         bits_left += 8;
 
         while bits_left >= 6 {
             bits_left -= 6;
-            let index = ((buffer >> bits_left) & 0b111111) as usize;
+            let index = ((buffer >> bits_left) & 0b11_1111) as usize;
             result.push(BASE64_CHARS[index] as char);
         }
     }
 
     if bits_left > 0 {
         buffer <<= 6 - bits_left;
-        let index = (buffer & 0b111111) as usize;
+        let index = (buffer & 0b11_1111) as usize;
         result.push(BASE64_CHARS[index] as char);
     }
 
@@ -36,6 +36,7 @@ pub fn base64_encode(input: String) -> String {
 }
 
 // Base64 decode a string into a vector of bytes
+#[allow(clippy::cast_possible_truncation)]
 pub fn base64_decode(encoded: &str) -> Option<Vec<u8>> {
     let mut decoded = Vec::new();
     let mut padding = 0;
