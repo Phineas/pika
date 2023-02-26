@@ -174,8 +174,6 @@ mod tests {
         assert_eq!(deconstructed.version, 1);
         assert_eq!(deconstructed.epoch, 1_650_153_600_000);
 
-        println!("{:?}", s_id);
-
         assert_eq!(s_deconstructed.node_id, Pika::compute_node_id());
         assert_eq!(s_deconstructed.seq, 1);
         assert_eq!(s_deconstructed.version, 1);
