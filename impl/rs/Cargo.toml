@@ -7,5 +7,6 @@ description="Pika ID implementation in Rust"
 license = "MPL-2.0"
 
 [dependencies]
+hex = "0.4.3"
 mac_address = "1.1.3"
 rand = "0.8.5"

@@ -1,5 +1,8 @@
 use std::io::Error;
 
+use rand::rngs::OsRng;
+use rand::RngCore;
+
 use crate::base64::{base64_decode, base64_encode};
 use crate::snowflake::{self, Snowflake};
 
@@ -68,21 +71,25 @@ impl Pika {
 
     pub fn deconstruct(&self, id: &str) -> DecodedPika {
         let s = id.split('_').collect::<Vec<&str>>();
-        let prefix = s[0].to_string();
-        let tail = s[1].to_string();
+
+        let prefix = s[..s.len() - 1].join("_");
+
+        let tail = s[s.len() - 1].to_string();
 
         let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix);
+
         let decoded_tail = base64_decode(&tail).unwrap();
 
-        let snowflake = self
-            .snowflake
-            .decode(&String::from_utf8_lossy(&decoded_tail));
-        let stringified_tail = String::from_utf8_lossy(&decoded_tail).to_string();
+        let decoded_tail = &String::from_utf8_lossy(&decoded_tail).to_string();
+        let sf = decoded_tail.split('_').collect::<Vec<&str>>();
+        let sf = sf[sf.len() - 1].to_string();
+
+        let snowflake = self.snowflake.decode(&sf);
 
         DecodedPika {
             prefix,
             tail,
-            snowflake: stringified_tail.parse::<u64>().unwrap(),
+            snowflake: sf.parse::<u64>().unwrap(),
             node_id: self.node_id,
             timestamp: snowflake.timestamp,
             epoch: self.epoch,
@@ -93,7 +100,11 @@ impl Pika {
     }
 
     pub fn gen(&mut self, prefix: &str) -> Result<String, Error> {
-        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && !prefix.is_empty();
+        let valid_prefix = prefix
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_')
+            && prefix.len() <= 32
+            && !prefix.is_empty();
 
         assert!(valid_prefix, "Invalid prefix: {prefix}");
 
@@ -104,12 +115,16 @@ impl Pika {
         let snowflake = self.snowflake.gen();
 
         let id = if prefix_record.unwrap().secure {
-            let random_bytes: String = (0..16).map(|_| rand::random::<u8>() as char).collect();
+            let mut bytes = [0u8; 16];
+            OsRng.fill_bytes(&mut bytes);
+
+            let hex_string = hex::encode(bytes);
 
             format!(
-                "{}_s_{}",
+                "{}_{}",
                 prefix,
-                base64_encode(random_bytes + &snowflake).replace('=', "")
+                base64_encode("s_".to_string() + &hex_string + "_" + snowflake.as_str())
+                    .replace('=', "")
             )
         } else {
             format!("{}_{}", prefix, base64_encode(snowflake).replace('=', ""))
@@ -125,11 +140,18 @@ mod tests {
 
     #[test]
     fn init_pika() {
-        let prefixes = [PrefixRecord {
-            prefix: "test".to_string(),
-            description: Some("test".to_string()),
-            secure: false,
-        }];
+        let prefixes = [
+            PrefixRecord {
+                prefix: "test".to_string(),
+                description: Some("test".to_string()),
+                secure: false,
+            },
+            PrefixRecord {
+                prefix: "s_test".to_string(),
+                description: Some("test".to_string()),
+                secure: true,
+            },
+        ];
 
         let mut pika = Pika::new(
             prefixes.to_vec(),
@@ -143,11 +165,21 @@ mod tests {
         let id = pika.gen("test").unwrap();
         let deconstructed = pika.deconstruct(&id);
 
-        // cant statically check because mac address is per device
+        let s_id = pika.gen("s_test").unwrap();
+
+        let s_deconstructed = pika.deconstruct(&s_id);
+
         assert_eq!(deconstructed.node_id, Pika::compute_node_id());
         assert_eq!(deconstructed.seq, 0);
         assert_eq!(deconstructed.version, 1);
         assert_eq!(deconstructed.epoch, 1_650_153_600_000);
+
+        println!("{:?}", s_id);
+
+        assert_eq!(s_deconstructed.node_id, Pika::compute_node_id());
+        assert_eq!(s_deconstructed.seq, 1);
+        assert_eq!(s_deconstructed.version, 1);
+        assert_eq!(s_deconstructed.epoch, 1_650_153_600_000);
     }
 
     #[test]
