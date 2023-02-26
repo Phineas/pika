@@ -54,6 +54,7 @@ impl Snowflake {
 
     pub fn decode(&self, sf: &str) -> DecodedSnowflake {
         let sf = sf.parse::<u64>().unwrap();
+
         let timestamp = (sf >> 22) + self.epoch;
         let node_id = (sf >> 12) & 0b11_1111_1111;
         let seq = sf & 0b1111_1111_1111;
