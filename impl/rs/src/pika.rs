@@ -3,14 +3,14 @@ use std::io::Error;
 use crate::base64::{base64_decode, base64_encode};
 use crate::snowflake::{self, Snowflake};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PrefixRecord {
     pub prefix: String,
     pub description: Option<String>,
     pub secure: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct DecodedPika {
     pub prefix: String,
     pub tail: String,
@@ -66,34 +66,10 @@ impl Pika {
         (first_mac % 1024) as u32
     }
 
-    pub fn deconstruct(&self, id: &str) -> DecodedPika {
-        let s = id.split('_').collect::<Vec<&str>>();
-        let prefix = s[0].to_string();
-        let tail = s[1].to_string();
-
-        let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix);
-        let decoded_tail = base64_decode(&tail).unwrap();
-
-        let snowflake = self
-            .snowflake
-            .decode(&String::from_utf8_lossy(&decoded_tail));
-        let stringified_tail = String::from_utf8_lossy(&decoded_tail).to_string();
-
-        DecodedPika {
-            prefix,
-            tail,
-            snowflake: stringified_tail.parse::<u64>().unwrap(),
-            node_id: self.node_id,
-            timestamp: snowflake.timestamp,
-            epoch: self.epoch,
-            seq: snowflake.seq,
-            version: 1,
-            prefix_record: prefix_record.unwrap().clone(),
-        }
-    }
-
     pub fn gen(&mut self, prefix: &str) -> Result<String, Error> {
-        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric()) && prefix.len() <= 32 && !prefix.is_empty();
+        let valid_prefix = prefix.chars().all(|c| c.is_ascii_alphanumeric())
+            && prefix.len() <= 32
+            && !prefix.is_empty();
 
         assert!(valid_prefix, "Invalid prefix: {prefix}");
 
@@ -105,17 +81,65 @@ impl Pika {
 
         let id = if prefix_record.unwrap().secure {
             let random_bytes: String = (0..16).map(|_| rand::random::<u8>() as char).collect();
-
+            let tail = format!("s_{}_{}", random_bytes, snowflake);
             format!(
-                "{}_s_{}",
+                "{}_{}",
                 prefix,
-                base64_encode(random_bytes + &snowflake).replace('=', "")
+                base64_encode(tail).replace('=', "")
             )
         } else {
             format!("{}_{}", prefix, base64_encode(snowflake).replace('=', ""))
         };
 
         Ok(id)
+    }
+
+    pub fn deconstruct(&self, id: &str) -> DecodedPika {
+        let parts: Vec<&str> = id.split('_').collect();
+        let prefix = parts[0];
+        let tail = parts[1];
+
+        let prefix_record = self.prefixes.iter().find(|x| x.prefix == prefix).unwrap();
+
+        if prefix_record.secure {
+            let decoded_tail = base64_decode(tail).unwrap();
+            let binding = String::from_utf8_lossy(&decoded_tail).to_string();
+            let decoded_tail_elements = binding.split('_').collect::<Vec<&str>>();
+
+            let snowflake = self.snowflake.decode(decoded_tail_elements[2]);
+
+            DecodedPika {
+                prefix: prefix.to_string(),
+                tail: tail.to_string(),
+                snowflake: decoded_tail_elements[2].parse::<u64>().unwrap(),
+                node_id: self.node_id,
+                timestamp: snowflake.timestamp,
+                epoch: self.epoch,
+                seq: snowflake.seq,
+                version: 1,
+                prefix_record: prefix_record.clone(),
+            }
+        } else {
+            let decoded_tail = base64_decode(&tail).unwrap();
+
+            let snowflake = self
+                .snowflake
+                .decode(&String::from_utf8_lossy(&decoded_tail));
+            let stringified_tail = String::from_utf8_lossy(&decoded_tail).to_string();
+    
+            DecodedPika {
+                prefix: prefix.to_string(),
+                tail: prefix.to_string(),
+                snowflake: stringified_tail.parse::<u64>().unwrap(),
+                node_id: self.node_id,
+                timestamp: snowflake.timestamp,
+                epoch: self.epoch,
+                seq: snowflake.seq,
+                version: 1,
+                prefix_record: prefix_record.clone(),
+            }
+        }
+        
     }
 }
 
