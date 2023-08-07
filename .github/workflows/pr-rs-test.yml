@@ -1,0 +1,37 @@
+name: Test Rust implementation on pull request
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "impl/rs/**"
+      - ".github/workflows/pr-rs-test.yml"
+
+jobs:
+  cargo-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Test with cargo
+        # Since github actions can't change the working directory, we have to cd int o the impl/rs directory
+        # and thus run cargo clippy manually, instead of using the cargo action
+        run: |
+          cd impl/rs
+          cargo test --all-targets --all-features
+
+  cargo-clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Clippy with cargo
+        run: |
+          cd impl/rs
+          cargo clippy --all-targets --all-features -- -D warnings

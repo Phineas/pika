@@ -1,4 +1,3 @@
-#![warn(clippy::pedantic)]
 #![allow(
     clippy::missing_panics_doc,
     clippy::missing_errors_doc,
@@ -8,4 +7,5 @@
 
 pub mod pika;
 pub mod snowflake;
+mod base64;
 mod utils;

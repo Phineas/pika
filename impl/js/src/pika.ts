@@ -1,7 +1,7 @@
 import {randomBytes} from 'crypto';
 import {networkInterfaces} from 'os';
 import {error, warn} from './logger';
-import {EpochResolvable, Snowflake} from './snowflake';
+import {DeconstructedSnowflake, EpochResolvable, Snowflake} from './snowflake';
 
 export interface PikaPrefixDefinition<P extends string> {
 	prefix: P;
@@ -10,7 +10,7 @@ export interface PikaPrefixDefinition<P extends string> {
 	metadata?: Record<string, unknown>;
 }
 
-export interface DecodedPika<P extends string> {
+export interface DecodedPika<P extends string> extends Omit<DeconstructedSnowflake, 'id'> {
 	prefix: P;
 
 	/**
@@ -124,7 +124,9 @@ export class Pika<Prefixes extends string> {
 			return false;
 		}
 
-		const [prefix, tail = null] = maybeId.split('_', 2);
+		const s = maybeId.split('_');
+		const tail = s[s.length - 1];
+		const prefix = s.slice(0, s.length - 1).join('_');
 
 		if (!tail) {
 			return false;
