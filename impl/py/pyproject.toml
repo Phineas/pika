@@ -1,5 +1,5 @@
 [project]
-name = "pika"
+name = "pika_id"
 version = "0.0.1"
 description = "The pragmatic ID system"
 classifiers = [

@@ -1,7 +1,7 @@
 import base64
 from dataclasses import dataclass, field
 from typing import Any, Dict, Generic, List, TypeVar
-from .snowflake import EpochResolvable, Snowflake
+from pika_id.snowflake import EpochResolvable, Snowflake
 import uuid
 
 P = TypeVar('P', bound=str)

@@ -1,7 +1,7 @@
 from datetime import datetime
 import unittest
 
-from pika.pika import Pika, PikaPrefixDefinition
+from pika_id.pika import Pika, PikaPrefixDefinition
 
 from freezegun import freeze_time
 

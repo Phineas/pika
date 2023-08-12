@@ -1,4 +1,4 @@
-from pika.pika import Pika, PikaPrefixDefinition
+from pika_id.pika import Pika, PikaPrefixDefinition
 
 __version__ = '0.0.1'
 __all__ = [
