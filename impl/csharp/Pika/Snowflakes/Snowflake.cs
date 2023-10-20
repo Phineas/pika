@@ -3,42 +3,42 @@
 public class Snowflake
 {
     private readonly ulong _epoch;
-    private readonly ulong _nodeId;
     private ulong _seq;
     private long _lastSequenceExhaustion;
 
     public Snowflake(ulong epoch, ulong nodeId)
     {
         _epoch = NormalizeEpoch(epoch);
-        _nodeId = nodeId;
+        NodeId = nodeId;
     }
 
-    public ulong NodeId => _nodeId;
+    public ulong NodeId { get; }
 
-    public ulong Gen(SnowflakeGenOptions? options = null)
+    public ulong Generate(SnowflakeGenOptions? options = null)
     {
-        var timestamp = options?.Timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-        if (_seq == 4095 && timestamp == _lastSequenceExhaustion)
+        options ??= new SnowflakeGenOptions();
+        var timestamp = options.Timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (timestamp < _lastSequenceExhaustion)
         {
-            // Purposely blocking
-            while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timestamp < 1)
+            throw new SequenceExhaustionError();
+        }
+
+        _lastSequenceExhaustion = timestamp;
+        if (timestamp == _lastSequenceExhaustion)
+        {
+            _seq++;
+            if (_seq > PikaConstants.SequenceMask)
             {
-                // Do nothing
+                throw new SequenceExhaustionError();
             }
         }
-
-        _seq = _seq >= 4095 ? 0 : _seq + 1;
-        if (_seq == 4095)
+        else
         {
-            _lastSequenceExhaustion = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            _seq = 0;
         }
 
-        var snowflake = ((timestamp - (long) _epoch) << 22) |
-                        (long) ((_nodeId & 0x3FF) << 12) |
-                        (long) _seq;
-
-        return (ulong) snowflake;
+        var result = ((timestamp - (long) _epoch) << 22) | (long) (NodeId << 12) | (long) _seq;
+        return (ulong) result;
     }
 
     public DeconstructedSnowflake Decode(ulong id)
@@ -53,7 +53,7 @@ public class Snowflake
         };
     }
 
-    private ulong NormalizeEpoch(EpochResolvable epoch)
+    private static ulong NormalizeEpoch(EpochResolvable epoch)
     {
         var timestamp = epoch.ToULong();
         if (timestamp < 1420070400000)
@@ -61,6 +61,6 @@ public class Snowflake
             throw new Exception("Epoch cannot be before 2015-01-01T00:00:00.000Z");
         }
 
-        return (ulong) timestamp;
+        return timestamp;
     }
 }

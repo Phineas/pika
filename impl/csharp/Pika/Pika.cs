@@ -56,7 +56,7 @@ public class Pika
         return Prefixes.ContainsKey(prefix);
     }
 
-    public string Gen(string prefix)
+    public string Generate(string prefix)
     {
         if (!PikaConstants.ValidPrefixRegex().IsMatch(prefix))
         {
@@ -65,14 +65,16 @@ public class Pika
 
         if (!Prefixes.ContainsKey(prefix) && !_suppressPrefixWarnings)
         {
-            Console.WriteLine(
-                $"Unregistered prefix ({prefix}) was used. This can cause unknown behavior - see https://github.com/hopinc/pika/tree/main/impl/js for details.");
+            throw new UnregisteredPrefixError(prefix);
         }
 
-        var snowflake = _snowflake.Gen();
-        var securePrefix = Prefixes[prefix].Secure ? $"s_{RandomHexString(16)}_" : "";
-        return
-            $"{prefix.ToLower()}_{Convert.ToBase64String(Encoding.UTF8.GetBytes(securePrefix + snowflake))}";
+        var snowflake = _snowflake.Generate();
+        var secure = Prefixes[prefix].Secure;
+        var tail = secure
+            ? Encoding.UTF8.GetBytes($"s_{RandomHexString(16)}_{snowflake}")
+            : Encoding.UTF8.GetBytes(snowflake.ToString());
+
+        return $"{prefix}_{Base64UrlEncoding.Encode(tail)}";
     }
 
     private string RandomHexString(int length)
@@ -83,27 +85,25 @@ public class Pika
         return bytes.ToHexString();
     }
 
-    public ulong GenSnowflake()
+    public ulong GenerateSnowflake()
     {
-        return _snowflake.Gen();
+        return _snowflake.Generate();
     }
 
     public DecodedPika Decode(string id)
     {
         try
         {
-            var s = id.Split('_');
-            var tail = s[^1];
-            var prefix = string.Join("_", s, 0, s.Length - 1);
-            var decodedTail = Encoding.UTF8.GetString(Convert.FromBase64String(tail));
-            var sfParts = decodedTail.Split('_');
-            if (sfParts.Length == 0)
-            {
-                throw new Exception("attempted to decode invalid pika; tail was corrupt");
-            }
+            var split = id.Split('_');
+            var tail = split[^1];
+            var prefix = string.Join("_", split, 0, split.Length - 1);
 
-            var snowflake = ulong.Parse(sfParts[^1]);
+            var decodedTail = Base64UrlEncoding.Decode(tail);
+            var tailString = Encoding.UTF8.GetString(decodedTail);
+            var snowflake = ulong.Parse(tailString.Split('_')[^1]);
+            
             var deconstructed = _snowflake.Decode(snowflake);
+
             return new DecodedPika
             {
                 Prefix = prefix,
@@ -112,7 +112,8 @@ public class Pika
                 Snowflake = snowflake,
                 Version = 1,
                 NodeId = deconstructed.NodeId,
-                Seq = deconstructed.Seq
+                Seq = deconstructed.Seq,
+                Timestamp = deconstructed.Timestamp
             };
         }
         catch (Exception)
@@ -122,7 +123,7 @@ public class Pika
         }
     }
 
-    private ulong ComputeNodeId()
+    private static ulong ComputeNodeId()
     {
         try
         {
@@ -130,15 +131,15 @@ public class Pika
             {
                 if (networkInterface.GetPhysicalAddress().ToString() == "00:00:00:00:00:00") continue;
                 var mac = networkInterface.GetPhysicalAddress().ToString();
-                return (ulong) (ulong.Parse(mac, System.Globalization.NumberStyles.HexNumber) % 1024);
+                return ulong.Parse(mac, System.Globalization.NumberStyles.HexNumber) % 1024;
             }
 
-            throw new Exception("no valid mac address found");
+            throw new Exception("No network interfaces found");
         }
         catch (Exception e)
         {
             Console.WriteLine("Failed to compute node ID, falling back to 0. Error:\n" + e);
-            return 0ul;
+            return 0UL;
         }
     }
 }

@@ -13,6 +13,8 @@ public class DecodedPika
     public ulong Seq { get; set; }
 
     public byte Version { get; set; }
+    
+    public ulong Timestamp { get; set; }
 
     public required PikaPrefix PrefixRecord { get; set; }
 }

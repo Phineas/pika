@@ -2,5 +2,5 @@
 
 public class SnowflakeGenOptions
 {
-    public required EpochResolvable Timestamp { get; set; }
+    public EpochResolvable? Timestamp { get; set; }
 }

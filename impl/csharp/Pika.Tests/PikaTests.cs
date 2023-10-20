@@ -10,13 +10,26 @@ public class PikaTests
             new PikaPrefix
             {
                 Prefix = "user",
+                Description = "User ID",
+            },
+            new PikaPrefix
+            {
+                Prefix = "sk",
+                Description = "Secret key",
+                Secure = true
             }
         });
 
-        var id = pika.Gen("user");
-        var decoded = pika.Decode(id);
+        // user_MjM4NDAxNDk2MTUzODYyMTQ1
+        var userId = pika.Generate("user");
 
-        Assert.Equal("user", decoded.Prefix);
-        Assert.Equal(1UL, decoded.Seq);
+        // sk_c19FMjdGRjMyMjhGNkE0MDdDRDFFMTZEMEY1Mzk1QUVGRl8yMzg0MDE0OTYxNTgwNTY0NTA
+        var secretKey = pika.Generate("sk");
+
+        var decodedUserId = pika.Decode(userId);
+        var decodedSecretKey = pika.Decode(secretKey);
+
+        Assert.Equal("user", decodedUserId.Prefix);
+        Assert.Equal("sk", decodedSecretKey.Prefix);
     }
 }

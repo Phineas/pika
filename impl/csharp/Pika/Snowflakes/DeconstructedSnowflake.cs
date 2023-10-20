@@ -2,13 +2,13 @@
 
 public class DeconstructedSnowflake
 {
-    public ulong Id { get; set; }
+    public ulong Id { get; init; }
     
-    public ulong Timestamp { get; set; }
+    public ulong Timestamp { get; init; }
     
-    public uint NodeId { get; set; }
+    public uint NodeId { get; init; }
     
-    public ulong Seq { get; set; }
+    public ulong Seq { get; init; }
     
-    public ulong Epoch { get; set; }
+    public ulong Epoch { get; init; }
 }

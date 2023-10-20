@@ -10,7 +10,7 @@ public class SnowflakeTests
         const ulong epoch = 1640995200000UL;
         const ulong nodeId = 1UL;
         var snowflake = new Snowflake(epoch, nodeId);
-        var id = snowflake.Gen();
+        var id = snowflake.Generate();
         var decoded = snowflake.Decode(id);
 
         Assert.Equal(1U, decoded.NodeId);
@@ -27,7 +27,7 @@ public class SnowflakeTests
 
         for (var i = 0; i < 10000; i++)
         {
-            var id = snowflake.Gen();
+            var id = snowflake.Generate();
             Assert.DoesNotContain(id, ids);
             ids.Add(id);
         }
