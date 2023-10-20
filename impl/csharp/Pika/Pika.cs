@@ -9,33 +9,29 @@ public class Pika
     public Dictionary<string, PikaPrefix> Prefixes { get; set; } = new();
 
     private readonly Snowflake _snowflake;
-    private readonly bool _suppressPrefixWarnings;
 
     public Pika(IEnumerable<PikaPrefix> prefixes, PikaInitializationOptions? options = null)
     {
         options ??= new PikaInitializationOptions();
         var nodeId = options.NodeId.HasValue ? (ulong) (options.NodeId.Value % (int) 1024ul) : ComputeNodeId();
         _snowflake = new Snowflake(options.Epoch ?? PikaConstants.DefaultEpoch, nodeId);
-        _suppressPrefixWarnings = options.SuppressPrefixWarnings;
         foreach (var definition in prefixes)
         {
-            if (!PikaConstants.ValidPrefixRegex().IsMatch(definition.Prefix))
+            if (!options.DangerouslyDisablePrefixValidation)
             {
-                throw new InvalidPrefixError(definition.Prefix);
+                if (!ValidatePrefix(definition.Prefix))
+                {
+                    throw new InvalidPrefixError(definition.Prefix);
+                }
             }
 
             Prefixes[definition.Prefix] = definition;
         }
     }
 
-    public bool Validate(string? maybeId, string? expectPrefix = default)
+    public bool Validate(string id, string? expectPrefix = default)
     {
-        if (maybeId == null)
-        {
-            return false;
-        }
-
-        var s = maybeId.Split('_');
+        var s = id.Split('_');
         var tail = s[^1];
         var prefix = string.Join("_", s, 0, s.Length - 1);
         if (string.IsNullOrEmpty(tail))
@@ -58,12 +54,7 @@ public class Pika
 
     public string Generate(string prefix)
     {
-        if (!PikaConstants.ValidPrefixRegex().IsMatch(prefix))
-        {
-            throw new InvalidPrefixError(prefix);
-        }
-
-        if (!Prefixes.ContainsKey(prefix) && !_suppressPrefixWarnings)
+        if (!Prefixes.ContainsKey(prefix))
         {
             throw new UnregisteredPrefixError(prefix);
         }
@@ -101,7 +92,7 @@ public class Pika
             var decodedTail = Base64UrlEncoding.Decode(tail);
             var tailString = Encoding.UTF8.GetString(decodedTail);
             var snowflake = ulong.Parse(tailString.Split('_')[^1]);
-            
+
             var deconstructed = _snowflake.Decode(snowflake);
 
             return new DecodedPika
@@ -121,6 +112,11 @@ public class Pika
             Console.WriteLine("Failed to decode ID " + id);
             throw;
         }
+    }
+
+    private static bool ValidatePrefix(string prefix)
+    {
+        return prefix.All(c => char.IsLetter(c) && char.IsLower(c));
     }
 
     private static ulong ComputeNodeId()

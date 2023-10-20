@@ -6,7 +6,5 @@ public class PikaInitializationOptions
 
     public int? NodeId { get; set; }
 
-    public bool SuppressPrefixWarnings { get; set; }
-
-    public bool DisableLowercase { get; set; }
+    public bool DangerouslyDisablePrefixValidation { get; set; }
 }
