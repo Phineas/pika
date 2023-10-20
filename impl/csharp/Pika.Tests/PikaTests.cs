@@ -39,6 +39,30 @@ public class PikaTests
     }
 
     [Fact]
+    public void Pika_GenerateAndDecode_ValidUserWithUnderscore()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user_id",
+                Description = "User ID",
+            }
+        });
+
+        // user_id_MjM4NDAxNDk2MTUzODYyMTQ1
+        var userId = pika.Generate("user_id");
+
+        var decodedUserId = pika.Decode(userId);
+
+        // Make sure the prefixes are correct
+        Assert.Equal("user_id", decodedUserId.Prefix);
+
+        // Make sure sequencing is working
+        Assert.Equal(1UL, decodedUserId.Seq);
+    }
+
+    [Fact]
     public void Pika_Uniqueness()
     {
         var pika = new Pika(new[]
@@ -175,6 +199,19 @@ public class PikaTests
                     Description = "User ID",
                 }
             });
+        });
+    }
+
+    [Fact]
+    public void Pika_ValidPrefix_UnderscoreCharacters()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user_id",
+                Description = "User ID",
+            }
         });
     }
 

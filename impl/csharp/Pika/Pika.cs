@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Pika.Snowflakes;
 
 namespace Pika;
@@ -116,7 +117,7 @@ public class Pika
 
     private static bool ValidatePrefix(string prefix)
     {
-        return prefix.All(c => char.IsLetter(c) && char.IsLower(c));
+        return Regex.IsMatch(prefix, "^[a-z]+(_[a-z]+)*$");
     }
 
     private static ulong ComputeNodeId()
