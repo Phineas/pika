@@ -3,7 +3,7 @@
 public class PikaTests
 {
     [Fact]
-    public void TestPika()
+    public void Pika_GenerateAndDecode_ValidUserAndSecretKey()
     {
         var pika = new Pika(new[]
         {
@@ -39,7 +39,46 @@ public class PikaTests
     }
 
     [Fact]
-    public void TestPrefixValidation()
+    public void Pika_Uniqueness()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user",
+                Description = "User ID",
+            },
+            new PikaPrefix
+            {
+                Prefix = "sk",
+                Description = "Secret key",
+                Secure = true
+            }
+        });
+
+        var ids = new HashSet<string>();
+
+        for (var i = 0; i < 10000; i++)
+        {
+            var id = pika.Generate("user");
+            Assert.DoesNotContain(id, ids);
+            ids.Add(id);
+        }
+
+        ids.Clear();
+
+        for (var i = 0; i < 10000; i++)
+        {
+            var id = pika.Generate("sk");
+            Assert.DoesNotContain(id, ids);
+            ids.Add(id);
+        }
+
+        ids.Clear();
+    }
+
+    [Fact]
+    public void Pika_Validation_ValidUserPrefix()
     {
         var pika = new Pika(new[]
         {
@@ -57,14 +96,74 @@ public class PikaTests
         });
 
         Assert.True(pika.Validate("user_MjM4NDAxNDk2MTUzODYyMTQ1"));
-        Assert.True(pika.Validate("sk_c19FMjdGRjMyMjhGNkE0MDdDRDFFMTZEMEY1Mzk1QUVGRl8yMzg0MDE0OTYxNTgwNTY0NTA"));
-        Assert.False(pika.Validate("user_MjM4NDAxNDk2MTUzODYyMTQ1", "sk"));
-        Assert.False(
-            pika.Validate("sk_c19FMjdGRjMyMjhGNkE0MDdDRDFFMTZEMEY1Mzk1QUVGRl8yMzg0MDE0OTYxNTgwNTY0NTA", "user"));
     }
-    
+
     [Fact]
-    public void TestInvalidPrefix()
+    public void Pika_Validation_ValidSecureKeyPrefix()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user",
+                Description = "User ID",
+            },
+            new PikaPrefix
+            {
+                Prefix = "sk",
+                Description = "Secret key",
+                Secure = true
+            }
+        });
+
+        Assert.True(pika.Validate("sk_c19FMjdGRjMyMjhGNkE0MDdDRDFFMTZEMEY1Mzk1QUVGRl8yMzg4MDE0OTYxNTgwNTY0NTA"));
+    }
+
+    [Fact]
+    public void Pika_Validation_InvalidUserPrefix()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user",
+                Description = "User ID",
+            },
+            new PikaPrefix
+            {
+                Prefix = "sk",
+                Description = "Secret key",
+                Secure = true
+            }
+        });
+
+        Assert.False(pika.Validate("user_MjM4NDAxNDk2MTUzODYyMTQ1", "sk"));
+    }
+
+    [Fact]
+    public void Pika_Validation_InvalidSecureKeyPrefix()
+    {
+        var pika = new Pika(new[]
+        {
+            new PikaPrefix
+            {
+                Prefix = "user",
+                Description = "User ID",
+            },
+            new PikaPrefix
+            {
+                Prefix = "sk",
+                Description = "Secret key",
+                Secure = true
+            }
+        });
+
+        Assert.False(
+            pika.Validate("sk_c19FMjdGRjMyMjhGNkE0MDdDRDFFMTZEMEY1Mzk1QUVGRl8yMzg4MDE0OTYxNTgwNTY0NTA", "user"));
+    }
+
+    [Fact]
+    public void Pika_InvalidPrefix_UppercaseCharacters()
     {
         Assert.Throws<InvalidPrefixError>(() =>
         {
@@ -77,7 +176,11 @@ public class PikaTests
                 }
             });
         });
+    }
 
+    [Fact]
+    public void Pika_InvalidPrefix_NumericCharacters()
+    {
         Assert.Throws<InvalidPrefixError>(() =>
         {
             var pika = new Pika(new[]
@@ -90,9 +193,9 @@ public class PikaTests
             });
         });
     }
-    
+
     [Fact]
-    public void TestUnregisteredPrefix()
+    public void Pika_UnregisteredPrefix_Generate()
     {
         Assert.Throws<UnregisteredPrefixError>(() =>
         {
@@ -104,7 +207,7 @@ public class PikaTests
                     Description = "User ID",
                 }
             });
-            
+
             pika.Generate("sk");
         });
     }
