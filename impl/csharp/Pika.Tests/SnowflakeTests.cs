@@ -5,7 +5,7 @@ namespace Pika.Tests;
 public class SnowflakeTests
 {
     [Fact]
-    public void TestSnowflake()
+    public void Snowflake_GenerateAndDecode()
     {
         const ulong epoch = 1640995200000UL;
         const ulong nodeId = 1UL;
@@ -13,14 +13,14 @@ public class SnowflakeTests
         var id = snowflake.Generate();
         var decoded = snowflake.Decode(id);
 
-        Assert.Equal(1U, decoded.NodeId);
+        Assert.Equal(nodeId, decoded.NodeId);
         Assert.Equal(1U, decoded.Seq);
         Assert.Equal(epoch, decoded.Epoch);
         Assert.Equal(id, decoded.Id);
     }
 
     [Fact]
-    public void TestSnowflakes()
+    public void Snowflake_UniqueIds()
     {
         var snowflake = new Snowflake(1640995200000UL, 1UL);
         var ids = new HashSet<ulong>();
