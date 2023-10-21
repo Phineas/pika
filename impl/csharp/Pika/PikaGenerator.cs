@@ -5,13 +5,13 @@ using Pika.Snowflakes;
 
 namespace Pika;
 
-public class Pika
+public class PikaGenerator
 {
     public Dictionary<string, PikaPrefix> Prefixes { get; set; } = new();
 
     private readonly Snowflake _snowflake;
 
-    public Pika(IEnumerable<PikaPrefix> prefixes, PikaInitializationOptions? options = null)
+    public PikaGenerator(IEnumerable<PikaPrefix> prefixes, PikaInitializationOptions? options = null)
     {
         options ??= new PikaInitializationOptions();
         var nodeId = options.NodeId.HasValue ? (ulong) (options.NodeId.Value % (int) 1024ul) : ComputeNodeId();

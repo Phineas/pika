@@ -5,7 +5,7 @@ public class PikaTests
     [Fact]
     public void Pika_GenerateAndDecode_ValidUserAndSecretKey()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -41,7 +41,7 @@ public class PikaTests
     [Fact]
     public void Pika_GenerateAndDecode_ValidUserWithUnderscore()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -65,7 +65,7 @@ public class PikaTests
     [Fact]
     public void Pika_Uniqueness()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -104,7 +104,7 @@ public class PikaTests
     [Fact]
     public void Pika_Validation_ValidUserPrefix()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -125,7 +125,7 @@ public class PikaTests
     [Fact]
     public void Pika_Validation_ValidSecureKeyPrefix()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -146,7 +146,7 @@ public class PikaTests
     [Fact]
     public void Pika_Validation_InvalidUserPrefix()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -167,7 +167,7 @@ public class PikaTests
     [Fact]
     public void Pika_Validation_InvalidSecureKeyPrefix()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -191,7 +191,7 @@ public class PikaTests
     {
         Assert.Throws<InvalidPrefixError>(() =>
         {
-            var pika = new Pika(new[]
+            var pika = new PikaGenerator(new[]
             {
                 new PikaPrefix
                 {
@@ -205,7 +205,7 @@ public class PikaTests
     [Fact]
     public void Pika_ValidPrefix_UnderscoreCharacters()
     {
-        var pika = new Pika(new[]
+        var pika = new PikaGenerator(new[]
         {
             new PikaPrefix
             {
@@ -220,7 +220,7 @@ public class PikaTests
     {
         Assert.Throws<InvalidPrefixError>(() =>
         {
-            var pika = new Pika(new[]
+            var pika = new PikaGenerator(new[]
             {
                 new PikaPrefix
                 {
@@ -236,7 +236,7 @@ public class PikaTests
     {
         Assert.Throws<UnregisteredPrefixError>(() =>
         {
-            var pika = new Pika(new[]
+            var pika = new PikaGenerator(new[]
             {
                 new PikaPrefix
                 {

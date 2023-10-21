@@ -11,7 +11,7 @@ dotnet add package Pika
 ## Usage
 
 ```csharp
-var pika = new Pika(new[]
+var pika = new PikaGenerator(new[]
 {
     new PikaPrefix
     {
