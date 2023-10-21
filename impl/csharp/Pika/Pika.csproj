@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>Pika</PackageId>
-        <Version>1.0.0</Version>
+        <Version>1.0.1</Version>
         <Authors>cat419</Authors>
         <Description>A C# implementation of hop.io's Pika, a combination of Stripe id's and Snowflakes.</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
