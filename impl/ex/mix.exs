@@ -1,6 +1,8 @@
 defmodule Pika.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/ArtieFuzzz/pika/tree/ex-impl/impl/ex"
+
   def project do
     [
       app: :pika,
@@ -11,14 +13,19 @@ defmodule Pika.MixProject do
       description: """
       Elixir implementation of hop.io's Pika. Combine Stripe IDs and Snowflakes.
       """,
+      docs: docs(),
       deps: deps()
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
+    []
+  end
+
+  def docs do
     [
-      extra_applications: [:logger]
+      source_url: @source_url
     ]
   end
 
@@ -27,7 +34,7 @@ defmodule Pika.MixProject do
       files: ["lib", "mix.exs", "README.md"],
       licenses: ["ISC"],
       links: %{
-        "GitHub" => "https://github.com/hopinc/pika/tree/main/impl/ex"
+        "GitHub" => @source_url
       }
     ]
   end
