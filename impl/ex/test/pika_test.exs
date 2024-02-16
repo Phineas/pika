@@ -9,13 +9,13 @@ defmodule PikaTest do
   end
 
   test "Generate an ID" do
-    {:ok, id} = Pika.gen("user")
+    id = Pika.gen!("user")
 
     assert String.starts_with?(id, "user")
   end
 
   test "Generate a secure ID" do
-    {:ok, id} = Pika.gen("server")
+    id = Pika.gen!("server")
 
     assert String.starts_with?(id, "server")
   end
@@ -35,19 +35,19 @@ defmodule PikaTest do
   test "Test 4096+ ids" do
     Enum.map(0..4095, fn s ->
       snowflake = Pika.Snowflake.generate()
-      {_timestamp, _node_id, seq} = Pika.Snowflake.decode(snowflake)
+      %{"seq" => seq} = Pika.Snowflake.decode(snowflake)
 
       assert seq == s
     end)
 
     last_snowflake = Pika.Snowflake.decode()
-    {_timestamp, _node_id, last_sequence} = Pika.Snowflake.deconstruct(last_snowflake)
+    %{"seq" => seq} = Pika.Snowflake.deconstruct(last_snowflake)
 
     assert last_sequence == 0
   end
 
   test "Validate node_id" do
-    id = Pika.gen("user")
+    id = Pika.gen!("user")
     deconstructed = Pika.deconstruct(id)
 
     deconstructed.node_id == Pika.Utils.compute_node_id()
