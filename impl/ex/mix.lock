@@ -1,0 +1,3 @@
+%{
+  "net_address": {:hex, :net_address, "0.3.0", "0fd8bdccdcb74986b7e808bc1f99a7cf4bbc8232bffd6958e18a963500adb541", [:mix], [], "hexpm", "678886a834e031009eda8a45f3e2cbda94a20a1e5fbc174e88e3f031eeb62c5f"},
+}
