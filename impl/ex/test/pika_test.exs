@@ -34,16 +34,16 @@ defmodule PikaTest do
 
   test "Test 4096+ ids" do
     Enum.map(0..4095, fn s ->
-      snowflake = Pika.Snowflake.generate()
-      %{"seq" => seq} = Pika.Snowflake.decode(snowflake)
+      id = Pika.gen!("user")
+      %{"seq" => seq} = Pika.deconstruct(id)
 
       assert seq == s
     end)
 
-    last_snowflake = Pika.Snowflake.decode()
-    %{"seq" => seq} = Pika.Snowflake.deconstruct(last_snowflake)
+    last_id = Pika.gen!("user")
+    %{"seq" => last_seq} = Pika.deconstruct(last_id)
 
-    assert last_sequence == 0
+    assert last_seq == 0
   end
 
   test "Validate node_id" do

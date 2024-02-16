@@ -29,7 +29,7 @@ defmodule Pika do
               bytes = :rand.bytes(16)
 
               tail =
-                "s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{Base.encode64(snowflake, padding: false)}"
+                "s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{snowflake}"
 
               {:ok, "#{prefix}_#{Base.encode64(tail, padding: false)}"}
             end
@@ -54,7 +54,6 @@ defmodule Pika do
     [prefix, tail] = fragments
 
     [prefix_record] = Enum.filter(prefixes, fn m -> m.prefix == prefix end)
-    IO.puts tail
     decoded_tail = Base.decode64!(tail, padding: false)
     tail_fragments = decoded_tail |> String.split("_")
     snowflake = tail_fragments |> Enum.at(length(tail_fragments) - 1)
