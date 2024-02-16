@@ -35,21 +35,21 @@ defmodule PikaTest do
   test "Test 4096+ ids" do
     Enum.map(0..4095, fn s ->
       id = Pika.gen!("user")
-      %{"seq" => seq} = Pika.deconstruct(id)
+      deconstructed = Pika.deconstruct(id)
 
-      assert seq == s
+      assert deconstructed.seq == s
     end)
 
     last_id = Pika.gen!("user")
-    %{"seq" => last_seq} = Pika.deconstruct(last_id)
+    deconstructed = Pika.deconstruct(last_id)
 
-    assert last_seq == 0
+    assert deconstructed.seq == 0
   end
 
   test "Validate node_id" do
     id = Pika.gen!("user")
     deconstructed = Pika.deconstruct(id)
 
-    deconstructed.node_id == Pika.Utils.compute_node_id()
+    assert deconstructed.node_id == Pika.Utils.compute_node_id()
   end
 end
