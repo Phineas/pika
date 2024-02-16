@@ -7,6 +7,10 @@ defmodule Pika.MixProject do
       version: "0.1.0",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
+      package: package(),
+      description: """
+      Elixir implementation of hop.io's Pika. Combine Stripe IDs and Snowflakes.
+      """,
       deps: deps()
     ]
   end
@@ -15,6 +19,16 @@ defmodule Pika.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  def package do
+    [
+      files: ["lib", "mix.exs", "README.md"],
+      licenses: ["ISC"],
+      links: %{
+        "GitHub" => "https://github.com/hopinc/pika/tree/main/impl/ex"
+      }
     ]
   end
 
