@@ -29,7 +29,7 @@ defmodule Pika do
               bytes = :rand.bytes(16)
 
               tail =
-                "s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{snowflake}"
+                "_s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{snowflake}"
 
               {:ok, "#{prefix}_#{Base.encode64(tail, padding: false)}"}
             end
