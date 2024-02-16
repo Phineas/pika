@@ -10,16 +10,10 @@ defmodule Pika do
   @spec gen(binary()) :: {:error, binary()} | {:ok, binary()}
   def gen(prefix) do
     case is_valid_prefix?(prefix) do
-      false ->
-        {:error, "Prefix is invalid (must be Alphanumeric)"}
-
       true ->
         prefixes = Application.get_env(:pika, :prefixes)
 
         case Enum.filter(prefixes, fn m -> m.prefix == prefix end) do
-          [] ->
-            {:error, "Prefix is undefined"}
-
           [prefix_record] ->
             snowflake = Snowflake.generate() |> Integer.to_string()
 
@@ -33,7 +27,13 @@ defmodule Pika do
 
               {:ok, "#{prefix}_#{Base.encode64(tail, padding: false)}"}
             end
+
+          _ ->
+            {:error, "Prefix is undefined"}
         end
+
+      _ ->
+        {:error, "Prefix is invalid (must be Alphanumeric)"}
     end
   end
 
@@ -60,6 +60,11 @@ defmodule Pika do
 
     decoded_snowflake = Snowflake.decode(snowflake)
 
-    Map.merge(decoded_snowflake, %{prefix: prefix, tail: tail, snowflake: snowflake, prefix_record: prefix_record})
+    Map.merge(decoded_snowflake, %{
+      prefix: prefix,
+      tail: tail,
+      snowflake: snowflake,
+      prefix_record: prefix_record
+    })
   end
 end
