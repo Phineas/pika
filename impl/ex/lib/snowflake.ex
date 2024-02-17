@@ -3,9 +3,41 @@ defmodule Pika.Snowflake do
   alias Pika.Utils
   use GenServer
 
-  @moduledoc false
+  @moduledoc """
+  `Pika.Snowflake` holds the state, generates Snowflakes, and decodes Snowflakes.
 
-  def start_link(%{"epoch" => epoch}) when is_integer(epoch) do
+  `Pika.Snowflake` should be started under a `Supervisor` or `Application` before you start using
+  `Pika.gen/0` or `Pika.deconstruct/1`
+
+  ```elixir
+  defmodule MyApp.Application do
+    use Application
+
+    def start(_type, _args) do
+      children = [Pika.Snowflake]
+
+      Supervisor.start_link(children, strategy: :one_for_one)
+    end
+  end
+  ```
+
+  or manually in `iex`
+
+  ```elixir
+  iex(1)> Pika.Snowflake.start_link()
+  {:ok, #PID<0.190.0>}
+  ```
+
+  ## Custom epoch
+
+  You can start `Pika.Snowflake` with a custom epoch by passing it:
+
+  ```elixir
+  Pika.Snowflake.start_link(1_650_153_600_000)
+  ```
+  """
+
+  def start_link(epoch) when is_integer(epoch) do
     GenServer.start_link(__MODULE__, {Utils.compute_node_id(), epoch, 0, 0}, name: __MODULE__)
   end
 
@@ -20,10 +52,23 @@ defmodule Pika.Snowflake do
     {:ok, state}
   end
 
+  @doc """
+  Generates a new Snowflake
+  """
+  @spec generate() :: integer()
   def generate do
     GenServer.call(__MODULE__, :generate)
   end
 
+  @doc """
+  Decodes a Snowflake and returns:
+
+  - timestamp
+  - epoch
+  - node_id
+  - seq
+  """
+  @spec decode(integer()) :: any()
   def decode(snowflake) do
     GenServer.call(__MODULE__, {:decode, snowflake})
   end
@@ -65,6 +110,7 @@ defmodule Pika.Snowflake do
     end
   end
 
+  @doc "Returns the current timestamp in milliseconds."
   def now_ts do
     System.os_time(:millisecond)
   end

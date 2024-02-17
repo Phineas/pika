@@ -10,14 +10,17 @@ defmodule Pika do
     Regex.match?(~r/^[0-9A-Za-z]+$/, prefix)
   end
 
+  @doc false
   defp _gen(prefix, snowflake, nil) do
     {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
   end
 
+  @doc false
   defp _gen(prefix, snowflake, false) do
     {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
   end
 
+  @doc false
   defp _gen(prefix, snowflake, true) do
     bytes = :rand.bytes(16)
 
@@ -28,6 +31,14 @@ defmodule Pika do
   end
 
   @spec gen(binary()) :: {:error, binary()} | {:ok, binary()}
+  @doc """
+  Generates an ID given a prefix (which should be configured).
+
+  This function will return an `{:error, binary()}` if one of the follow conditions are met:
+
+  1. The prefix isn't valid
+  2. The prefix isn't configured
+  """
   def gen(prefix) do
     case valid_prefix?(prefix) do
       true ->
@@ -48,16 +59,30 @@ defmodule Pika do
     end
   end
 
+  @spec gen!(binary()) :: binary()
   def gen!(prefix) do
     {:ok, id} = gen(prefix)
 
     id
   end
 
+  @spec gen() :: {:error, binary()}
   def gen do
     {:error, "No prefix was specified"}
   end
 
+  @doc """
+  Deconstructs a Pika ID and returns it's metadata:
+
+  - prefix
+  - tail
+  - snowflake
+  - timestamp
+  - prefix_record
+  - epoch
+  - node_id
+  - seq
+  """
   def deconstruct(id) do
     prefixes = Application.get_env(:pika, :prefixes)
 
