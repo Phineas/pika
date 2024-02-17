@@ -32,6 +32,14 @@ defmodule PikaTest do
     assert message == "Prefix is invalid (must be Alphanumeric)"
   end
 
+  test "Snowflake custom timestamp" do
+    timestamp = 1_708_158_291_035
+    snowflake = Pika.Snowflake.generate(timestamp)
+    decoded = Pika.Snowflake.decode(snowflake)
+
+    assert decoded.timestamp == timestamp
+  end
+
   test "Test 4096+ ids" do
     Enum.map(0..4095, fn s ->
       id = Pika.gen!("user")

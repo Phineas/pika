@@ -92,7 +92,7 @@ defmodule Pika do
     [prefix_record] = Enum.filter(prefixes, fn m -> m.prefix == prefix end)
     decoded_tail = Base.decode64!(tail, padding: false)
     tail_fragments = decoded_tail |> String.split("_")
-    snowflake = tail_fragments |> Enum.at(length(tail_fragments) - 1)
+    snowflake = tail_fragments |> Enum.at(length(tail_fragments) - 1) |> String.to_integer()
 
     decoded_snowflake = Snowflake.decode(snowflake)
 

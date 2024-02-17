@@ -77,7 +77,7 @@ defmodule Pika.Snowflake do
   - seq
   """
   @spec decode(integer()) :: any()
-  def decode(snowflake) do
+  def decode(snowflake) when is_integer(snowflake) do
     GenServer.call(__MODULE__, {:decode, snowflake})
   end
 
@@ -86,8 +86,6 @@ defmodule Pika.Snowflake do
         _from,
         state = {_node_id, epoch, _seq, _last_seq_exhaustion}
       ) do
-    snowflake = snowflake |> String.to_integer()
-
     timestamp = (snowflake >>> 22) + epoch
     node_id = snowflake >>> 12 &&& 0b11_1111_1111
     seq = snowflake &&& 0b1111_1111_1111
