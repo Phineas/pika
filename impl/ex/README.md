@@ -1,5 +1,7 @@
 # Pika
 
+> Elixir implementation of Pika
+
 Combine Stripe IDs with Snowflakes you get Pika! The last ID system you'll ever need!
 Combining pragmatism with functionality
 
