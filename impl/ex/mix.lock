@@ -1,3 +1,6 @@
 %{
-  "net_address": {:hex, :net_address, "0.3.0", "0fd8bdccdcb74986b7e808bc1f99a7cf4bbc8232bffd6958e18a963500adb541", [:mix], [], "hexpm", "678886a834e031009eda8a45f3e2cbda94a20a1e5fbc174e88e3f031eeb62c5f"},
+  "bunt": {:hex, :bunt, "1.0.0", "081c2c665f086849e6d57900292b3a161727ab40431219529f13c4ddcf3e7a44", [:mix], [], "hexpm", "dc5f86aa08a5f6fa6b8096f0735c4e76d54ae5c9fa2c143e5a1fc7c1cd9bb6b5"},
+  "credo": {:hex, :credo, "1.7.4", "68ca5cf89071511c12fd9919eb84e388d231121988f6932756596195ccf7fd35", [:mix], [{:bunt, "~> 0.2.1 or ~> 1.0", [hex: :bunt, repo: "hexpm", optional: false]}, {:file_system, "~> 0.2 or ~> 1.0", [hex: :file_system, repo: "hexpm", optional: false]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "9cf776d062c78bbe0f0de1ecaee183f18f2c3ec591326107989b054b7dddefc2"},
+  "file_system": {:hex, :file_system, "1.0.0", "b689cc7dcee665f774de94b5a832e578bd7963c8e637ef940cd44327db7de2cd", [:mix], [], "hexpm", "6752092d66aec5a10e662aefeed8ddb9531d79db0bc145bb8c40325ca1d8536d"},
+  "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
 }
