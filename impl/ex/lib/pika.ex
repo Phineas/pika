@@ -1,33 +1,39 @@
 defmodule Pika do
   alias Pika.Snowflake
+  import Pika.Utils, only: [filter_prefixes: 2]
 
-  @spec is_valid_prefix?(binary()) :: boolean()
-  defp is_valid_prefix?(prefix) do
+  @moduledoc false
+
+  @spec valid_prefix?(binary()) :: boolean()
+  defp valid_prefix?(prefix) do
     # Checks if `prefix` is alphanumeric
     Regex.match?(~r/^[0-9A-Za-z]+$/, prefix)
   end
 
+  defp _gen(prefix, snowflake, secure) do
+    unless secure do
+      {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
+    end
+
+    bytes = :rand.bytes(16)
+
+    tail =
+      "_s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{snowflake}"
+
+    {:ok, "#{prefix}_#{Base.encode64(tail, padding: false)}"}
+  end
+
   @spec gen(binary()) :: {:error, binary()} | {:ok, binary()}
   def gen(prefix) do
-    case is_valid_prefix?(prefix) do
+    case valid_prefix?(prefix) do
       true ->
         prefixes = Application.get_env(:pika, :prefixes)
 
-        case Enum.filter(prefixes, fn m -> m.prefix == prefix end) do
+        case filter_prefixes(prefix, prefixes) do
           [prefix_record] ->
             snowflake = Snowflake.generate() |> Integer.to_string()
 
-            unless prefix_record[:secure] do
-              {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
-            else
-              bytes = :rand.bytes(16)
-
-              tail =
-                "_s_#{Base.encode32(bytes, padding: false, case: :lower)}_#{snowflake}"
-
-              {:ok, "#{prefix}_#{Base.encode64(tail, padding: false)}"}
-            end
-
+            _gen(prefix, snowflake, prefix_record[:secure])
           _ ->
             {:error, "Prefix is undefined"}
         end
