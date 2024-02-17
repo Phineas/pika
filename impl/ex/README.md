@@ -19,3 +19,31 @@ def deps do
   ]
 end
 ```
+
+In your `config.exs`:
+
+```elixir
+config :pika,
+  prefixes: [
+    %{prefix: "user", description: "User IDs"},
+    %{prefix: "server", description: "Server IDs", secure: true},
+    # ...
+  ]
+```
+
+## Example
+
+`Pika.Snowflake` should be started under a `Supervisor` or `Application` before you start using
+`Pika.gen/0` or `Pika.deconstruct/1`
+
+```elixir
+defmodule MyApp.Application do
+  use Application
+
+  def start(_type, _args) do
+    children = [Pika.Snowflake]
+
+    Supervisor.start_link(children, strategy: :one_for_one)
+  end
+end
+```
