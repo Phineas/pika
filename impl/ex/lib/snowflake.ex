@@ -57,7 +57,15 @@ defmodule Pika.Snowflake do
   """
   @spec generate() :: integer()
   def generate do
-    GenServer.call(__MODULE__, :generate)
+    GenServer.call(__MODULE__, {:generate, now_ts()})
+  end
+
+  @doc """
+  Generates a new Snowflake with the given `timestamp`
+  """
+  @spec generate(integer()) :: integer()
+  def generate(timestamp) do
+    GenServer.call(__MODULE__, {:generate, timestamp})
   end
 
   @doc """
@@ -87,14 +95,12 @@ defmodule Pika.Snowflake do
     {:reply, %{timestamp: timestamp, epoch: epoch, node_id: node_id, seq: seq}, state}
   end
 
-  def handle_call(:generate, _from, {node_id, epoch, seq, last_seq_exhaustion}) do
-    now = now_ts()
-
-    if seq >= 4095 and now == last_seq_exhaustion do
-      :timer.sleep(1)
+  def handle_call({:generate, timestamp}, _from, {node_id, epoch, seq, last_seq_exhaustion}) do
+    if seq >= 4095 and timestamp == last_seq_exhaustion do
+      block(timestamp)
     end
 
-    snowflake = (now - epoch) <<< 22 ||| node_id <<< 12 ||| seq
+    snowflake = (timestamp - epoch) <<< 22 ||| node_id <<< 12 ||| seq
 
     seq =
       if seq >= 4095 do
@@ -103,10 +109,18 @@ defmodule Pika.Snowflake do
         seq + 1
       end
 
-    if now === last_seq_exhaustion do
-      {:reply, snowflake, {node_id, epoch, seq, now}}
+    if timestamp === last_seq_exhaustion do
+      {:reply, snowflake, {node_id, epoch, seq, timestamp}}
     else
       {:reply, snowflake, {node_id, epoch, seq, now_ts()}}
+    end
+  end
+
+  @doc false
+  defp block(timestamp) do
+    if now_ts() - timestamp < 1 do
+      :timer.sleep(100)
+      block(timestamp)
     end
   end
 
