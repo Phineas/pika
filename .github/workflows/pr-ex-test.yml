@@ -1,0 +1,47 @@
+name: Test Elixir implementation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "impl/ex/**"
+      - ".github/workflows/pr-ex-test.yml"
+
+jobs:
+  credo:
+    runs-on: ubuntu
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.16.1"
+      - name: Run credo
+        run: |
+          cd impl/ex
+
+          mix deps.get && mix deps.compile
+
+          mix credo
+
+  test:
+    runs-on: ubuntu
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        otp: ["25", "26"]
+        elixir: ["1.16.1", "1.15.7", "1.14.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - name: Run Tests
+        run: |
+          cd impl/ex
+
+          mix deps.get && mix deps.compile
+
+          mix test
+
