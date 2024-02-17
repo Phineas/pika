@@ -10,11 +10,15 @@ defmodule Pika do
     Regex.match?(~r/^[0-9A-Za-z]+$/, prefix)
   end
 
-  defp _gen(prefix, snowflake, secure) do
-    unless secure do
-      {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
-    end
+  defp _gen(prefix, snowflake, nil) do
+    {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
+  end
 
+  defp _gen(prefix, snowflake, false) do
+    {:ok, "#{prefix}_#{Base.encode64(snowflake, padding: false)}"}
+  end
+
+  defp _gen(prefix, snowflake, true) do
     bytes = :rand.bytes(16)
 
     tail =
@@ -34,6 +38,7 @@ defmodule Pika do
             snowflake = Snowflake.generate() |> Integer.to_string()
 
             _gen(prefix, snowflake, prefix_record[:secure])
+
           _ ->
             {:error, "Prefix is undefined"}
         end
