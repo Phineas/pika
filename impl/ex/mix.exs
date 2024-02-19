@@ -27,7 +27,7 @@ defmodule Pika.MixProject do
     [
       source_url: @source_url,
       main: "readme",
-      extras: ["README.md"]
+      extras: ["./README.md"]
     ]
   end
 
