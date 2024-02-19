@@ -7,7 +7,7 @@ defmodule Pika do
   @spec valid_prefix?(binary()) :: boolean()
   defp valid_prefix?(prefix) do
     # Checks if `prefix` is alphanumeric
-    Regex.match?(~r/^[0-9A-Za-z]+$/, prefix)
+    Regex.match?(~r/^[0-9a-z_]+$/, prefix)
   end
 
   @doc false
