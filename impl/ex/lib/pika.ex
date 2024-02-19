@@ -2,7 +2,7 @@ defmodule Pika do
   alias Pika.Snowflake
   import Pika.Utils, only: [filter_prefixes: 2]
 
-  @moduledoc false
+  @moduledoc nil
 
   @spec valid_prefix?(binary()) :: boolean()
   defp valid_prefix?(prefix) do

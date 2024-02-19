@@ -49,3 +49,12 @@ defmodule MyApp.Application do
   end
 end
 ```
+
+Somewhere in your application:
+
+```elixir
+# ...
+Pika.gen("user") # or Pika.gen!("user")
+
+{:ok, "user_MjgyNDQ2NjY1OTk3MjEzNjk3"}
+```

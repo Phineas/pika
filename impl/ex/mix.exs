@@ -25,7 +25,9 @@ defmodule Pika.MixProject do
 
   def docs do
     [
-      source_url: @source_url
+      source_url: @source_url,
+      main: "readme",
+      extras: ["README.md"]
     ]
   end
 
