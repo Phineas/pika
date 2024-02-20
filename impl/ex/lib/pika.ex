@@ -66,11 +66,6 @@ defmodule Pika do
     id
   end
 
-  @spec gen() :: {:error, binary()}
-  def gen do
-    {:error, "No prefix was specified"}
-  end
-
   @doc """
   Deconstructs a Pika ID and returns it's metadata:
 
