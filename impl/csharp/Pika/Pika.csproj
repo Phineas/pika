@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Pika</PackageId>
+        <Version>1.0.1</Version>
+        <Authors>cat419</Authors>
+        <Description>A C# implementation of hop.io's Pika, a combination of Stripe id's and Snowflakes.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>
+            https://github.com/hopinc/pika
+        </PackageProjectUrl>
+        <RepositoryUrl>
+            https://github.com/hopinc/pika
+        </RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>stripe, snowflake, pika</PackageTags>
+    </PropertyGroup>
+
+</Project>
