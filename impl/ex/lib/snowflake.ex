@@ -7,7 +7,7 @@ defmodule Pika.Snowflake do
   `Pika.Snowflake` holds the state, generates Snowflakes, and decodes Snowflakes.
 
   `Pika.Snowflake` should be started under a `Supervisor` or `Application` before you start using
-  `Pika.gen/0` or `Pika.deconstruct/1`
+  `Pika.gen/1` or `Pika.deconstruct/1`
 
   ```elixir
   defmodule MyApp.Application do
