@@ -37,16 +37,18 @@ defmodule Pika.Snowflake do
   ```
   """
 
+  def start_link([]) do
+    # State: {node_id, epoch, seq, last_sequence_exhaustion}
+    GenServer.start_link(__MODULE__, {Utils.compute_node_id(), 1_640_995_200_000, 0, 0},
+      name: __MODULE__
+    )
+  end
+
   def start_link(epoch) when is_integer(epoch) do
     GenServer.start_link(__MODULE__, {Utils.compute_node_id(), epoch, 0, 0}, name: __MODULE__)
   end
 
-  def start_link() do
-    GenServer.start_link(__MODULE__, {Utils.compute_node_id(), 1_640_995_200_000, 0, 0}, name: __MODULE__)
-  end
-
-  def start_link([]) do
-    # State: {node_id, epoch, seq, last_sequence_exhaustion}
+  def start_link do
     GenServer.start_link(__MODULE__, {Utils.compute_node_id(), 1_640_995_200_000, 0, 0},
       name: __MODULE__
     )
