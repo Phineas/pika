@@ -1,14 +1,28 @@
 defmodule Pika.Utils do
   @moduledoc false
 
+  defp validate_address(address) do
+    case address do
+      nil -> :error
+      [0, 0, 0, 0, 0, 0] -> :error
+      [_, _, _, _, _, _] = addr -> {:ok, addr}
+      _ -> :error
+    end
+  end
+
   def get_mac_address do
     {:ok, addresses} = :inet.getifaddrs()
 
-    addresses
-    |> Enum.filter(fn {name, _opts} -> name != "lo" end)
-    |> Enum.map(fn {_name, data} -> data[:hwaddr] end)
+    {_if_name, if_mac} = Enum.reduce(addresses, [], fn ({if_name, if_data}, acc) ->
+      case Keyword.get(if_data, :hwaddr) |> validate_address do
+        {:ok, address} -> [{to_string(if_name), address} | acc]
+        _ -> acc
+      end
+    end)
     |> List.first()
-    |> Enum.map_join(":", &Integer.to_string(&1, 16))
+
+    if_mac
+    |> Enum.map_join(":", fn i -> Integer.to_string(i, 16) |> String.pad_leading(2, "0") end)
   end
 
   @spec compute_node_id() :: integer()
