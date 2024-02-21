@@ -16,6 +16,7 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           elixir-version: "1.16.1"
+          otp-version: "26"
       - name: Run credo
         run: |
           cd impl/ex
@@ -29,7 +30,7 @@ jobs:
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
       matrix:
-        otp: ["25", "26"]
+        otp: ["25"]
         elixir: ["1.16.1", "1.15.7", "1.14.0"]
     steps:
       - uses: actions/checkout@v4
