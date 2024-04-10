@@ -23,10 +23,10 @@ Example ID: `user_MTI5Njg4Njg1MDQwODg5ODYx`
 
 ## Implementations
 
-[JS (TypeScript)](https://github.com/hopinc/pika/tree/main/impl/js)
-[Rust](https://github.com/hopinc/pika/tree/main/impl/rs)
-[Elixir](https://github.com/hopinc/pika/tree/main/impl/ex)
-[C#](https://github.com/hopinc/pika/tree/main/impl/csharp)
+- [JS (TypeScript)](/impl/js)  
+- [Rust](/impl/rs)  
+- [Elixir](/impl/ex)  
+- [C#](/impl/csharp)  
 
 ## The ID
 
