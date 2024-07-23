@@ -17,7 +17,7 @@ The package can be installed by adding `pika` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:pika, "~> 0.1"}
+    {:pika, "~> 0.3"}
   ]
 end
 ```

@@ -13,13 +13,14 @@ defmodule Pika.Utils do
   def get_mac_address do
     {:ok, addresses} = :inet.getifaddrs()
 
-    {_if_name, if_mac} = Enum.reduce(addresses, [], fn ({if_name, if_data}, acc) ->
-      case Keyword.get(if_data, :hwaddr) |> validate_address do
-        {:ok, address} -> [{to_string(if_name), address} | acc]
-        _ -> acc
-      end
-    end)
-    |> List.first()
+    {_if_name, if_mac} =
+      Enum.reduce(addresses, [], fn {if_name, if_data}, acc ->
+        case Keyword.get(if_data, :hwaddr) |> validate_address do
+          {:ok, address} -> [{to_string(if_name), address} | acc]
+          _ -> acc
+        end
+      end)
+      |> List.first()
 
     if_mac
     |> Enum.map_join(":", fn i -> Integer.to_string(i, 16) |> String.pad_leading(2, "0") end)
